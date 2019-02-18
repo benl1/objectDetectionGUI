@@ -19,10 +19,9 @@ function readURL() {
     }
   }
 
-class LikeButton extends React.Component {
+class UploadButton extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { liked: false };
   }
 
   render() {
