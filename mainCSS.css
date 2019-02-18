@@ -1,0 +1,11 @@
+.targetTitle {
+    min-width: 60%;
+    height: 10%;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
