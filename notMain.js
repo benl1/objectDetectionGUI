@@ -7,72 +7,45 @@ document.getElementsByTagName('head')[0].appendChild(script);
 
 function readURL() {
     let input = document.getElementById("targetImageUploader");
+
     if (input.files && input.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
+    	var reader = new FileReader();
+
+    	reader.onload = function (e) {
         $('#imageGoesHere')
           .attr('src', e.target.result)
           .width(500)
           .height(500);
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
+      	};
+      	reader.readAsDataURL(input.files[0]);
+	}
+}
 
-class UploadButton extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-
+function UploadButton(props) {
     return e(
-      'input',//type of element to create
-      { 
-         style: {
-             width: "200px"
-         },
-         type: "file",
-         id: "targetImageUploader",
-         accept: ".jpg, .png",
-         onChange: () => {readURL()}
-         } //settings object with settings for object
-    );
-  }
+    	'input',//type of element to create
+      	{ 
+        	style: { width: "200px" },
+         	type: "file",
+         	id: "targetImageUploader",
+         	accept: ".jpg, .png",
+         	onChange: () => {readURL()}
+      	} //settings object with settings for object
+	);
 }
 
-class TargetTitle extends React.Component {
-
-    render() {
-        return e(
-            'h3',
-            {
-                class: "targetTitle"
-
-            },
-            "Select search object"
-        )
-    }
-
+function TargetTitle(props) {
+	return (<h3 className='targetTitle'>Select search object</h3>);
 }
 
-class SelectorPage extends ReactComponent {
-    render() {
-        return (
-            <div>
-                <div>
-                    <TargetTitle />
-                </div>
-                <div> 
-                    <LikeButton />
-                </div>
-            </div>
-            
-        );
-    }
+function SelectorPage(props) {
+	return (
+		<div>
+			<TargetTitle />
+			<LikeButton />
+	    </div>
+	);
 }
-
-
 
 const domContainer = document.querySelector('#root');
 ReactDOM.render(
