@@ -1,37 +1,13 @@
 const e = React.createElement;
 
-var script = document.createElement('script');
-script.src = 'http://code.jquery.com/jquery-1.11.0.min.js';
-script.type = 'text/javascript';
-document.getElementsByTagName('head')[0].appendChild(script);
-
-function readURL() {
-    let input = document.getElementById("targetImageUploader");
-
-    if (input.files && input.files[0]) {
-    	var reader = new FileReader();
-
-    	reader.onload = function (e) {
-        $('#imageGoesHere')
-          .attr('src', e.target.result)
-          .width(500)
-          .height(500);
-      	};
-      	reader.readAsDataURL(input.files[0]);
+class UploadButton extends React.Component {
+	clickHandler(evt) {
+		alert('hello!');
 	}
-}
 
-function UploadButton(props) {
-    return e(
-    	'input',//type of element to create
-      	{ 
-        	style: { width: "200px" },
-         	type: "file",
-         	id: "targetImageUploader",
-         	accept: ".jpg, .png",
-         	onChange: () => {readURL()}
-      	} //settings object with settings for object
-	);
+	render() {
+		return (<div className='imageBox' onClick={this.clickHandler}></div>);
+	}
 }
 
 function TargetTitle(props) {
@@ -42,13 +18,13 @@ function SelectorPage(props) {
 	return (
 		<div>
 			<TargetTitle />
-			<LikeButton />
-	    </div>
+			//<UploadButton />
+	    	</div>
 	);
 }
 
 const domContainer = document.querySelector('#root');
 ReactDOM.render(
-    <SelectorPage />,
-    document.getElementById("root")
+    	<SelectorPage />,
+    	document.getElementById("root")
 );

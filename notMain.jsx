@@ -1,82 +1,89 @@
-const e = React.createElement;
+const { dialog } = require('electron').remote; // use remote since we're in a render thread
 
-var script = document.createElement('script');
-script.src = 'http://code.jquery.com/jquery-1.11.0.min.js';
-script.type = 'text/javascript';
-document.getElementsByTagName('head')[0].appendChild(script);
+class ImageContainer extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			images: [],
+		}
+	}
 
-function readURL() {
-    let input = document.getElementById("targetImageUploader");
-    if (input.files && input.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        $('#imageGoesHere')
-          .attr('src', e.target.result)
-          .width(500)
-          .height(500);
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
+	test() {
+		let files = dialog.showOpenDialog({
+			properties: ['openFile'],
+			filters: [{name: 'Images', extensions: ['jpg', 'png']}]
+		});
+		alert(files);
+		if (files === undefined) {
+			return;
+		}
 
-class LikeButton extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { liked: false };
-  }
+		let imgs = this.state.images;
+		 // last element of imgs will always have the highest id
+		let available_id = imgs.length === 0 ? 0 : (imgs[imgs.length - 1].props.id + 1);
+		imgs.push(<Image key={available_id} id={available_id} rem={(id) => this.removeImage(id)} f={files}/>);
+		this.setState({images: imgs});
+	}
 
-  render() {
+	removeImage(id) {
+		let clickedIndex = dialog.showMessageBox({
+			type: "question",
+			message: "Are you sure you want to delete this image?",
+			buttons: ["Yes", "No"]
+		});
+		if (clickedIndex) return;
+		let imgs = this.state.images;
+		imgs = imgs.filter((x) => x.props.id !== id);
+		console.log(imgs);
+		this.setState({images: imgs});
+	}
 
-    return e(
-      'input',//type of element to create
-      { 
-         style: {
-             width: "200px"
-         },
-         type: "file",
-         id: "targetImageUploader",
-         accept: ".jpg, .png",
-         onChange: () => {readURL()}
-         } //settings object with settings for object
-    );
-  }
+	render() {
+		return (
+			<div>
+				<ImageUploadButton 
+					click={() => this.test()}
+				/>
+				<div className="imageContainer">
+					{this.state.images}
+				</div>
+			</div>
+		);
+	}
 }
 
-class TargetTitle extends React.Component {
-
-    render() {
-        return e(
-            'h3',
-            {
-                className: "targetTitle"
-
-            },
-            "Select search object"
-        )
-    }
-
+class Image extends React.Component {
+	render() {
+		return (
+			<div className='imageWrapper'>
+				<img src={this.props.f} height='100%' width='100%'/>
+				<div className='imageDelete' onClick={() => this.props.rem(this.props.id)}>x</div>
+			</div>
+		);
+	}
 }
 
-class SelectorPage extends React.Component {
-    render() {
-        return (
-            <div>
-                <div>
-                    <TargetTitle />
-                </div>
-                <div> 
-                    <LikeButton />
-                </div>
-            </div>
-            
-        );
-    }
+class ImageUploadButton extends React.Component {
+	render() {
+		return <div className="uploader" onClick={() => this.props.click()}>test</div>;
+	}
 }
 
+function TargetTitle(props) {
+	return (<h3 className='targetTitle'>Select search object</h3>);
+}
 
+function SelectorPage(props) {
+	return (
+		<div>
+			<TargetTitle />
+			<ImageContainer />
+		</div>
+	);
+}
 
 const domContainer = document.querySelector('#root');
 ReactDOM.render(
-    <SelectorPage />,
-    document.getElementById("root")
+    	<SelectorPage />,
+    	document.getElementById("root")
 );
