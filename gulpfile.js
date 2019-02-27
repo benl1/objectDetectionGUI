@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var babel = require('gulp-babel');
+var spawn = require('child_process').spawn;
 
 // all this file is doing is transpiling the jsx files in src/ into js files in dist/
 gulp.task('entrypoint', () => {
@@ -42,7 +43,7 @@ gulp.task('control', () => {
         .pipe(gulp.dest('dist/control/'));
 });
 
-gulp.task('default',
+gulp.task('transpile',
     gulp.parallel('entrypoint', 'image-choice-screen', 'scene-selection-screen', 'output-screen', 'control'),
     (done) => done()
 );
