@@ -1,5 +1,6 @@
 import React from 'react';
 import { displayYesNoDialog, displayImageUploadDialog } from '../control/dialogs';
+import { displaySceneSelectionScreen } from '../entrypoint';
 
 export default class ImageChoiceScreen extends React.Component {
     render() {
@@ -7,6 +8,7 @@ export default class ImageChoiceScreen extends React.Component {
             <div>
                 <ImageChoiceScreenTitle />
                 <ImageContainer app={this.props.app} />
+                <div className='button' onClick={() => displaySceneSelectionScreen(this.props.app)}>Scene Selection</div>
             </div>
         );
     }
@@ -16,6 +18,7 @@ class ImageContainer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            // TODO: use this.props.app to initialize the images array
             images: [], // an array of Image objects
         }
     }
