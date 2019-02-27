@@ -1,0 +1,55 @@
+.targetTitle {
+    min-width: 60%;
+    height: 10%;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+div.imageWrapper {
+	box-shadow: 3px 3px 10px black;
+	border: 2px solid black;
+	position: relative;
+	margin-right: 1rem;
+	margin-top: 1rem;
+}
+
+img.image {
+	width: 100px;
+	height: 100px;
+}
+
+div.imageDelete {
+	position: absolute;
+	top: 10%;
+	right: 10%;
+	color: red;
+	cursor: pointer;
+}
+
+div.imageContainer {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.uploader {
+	display: block;
+}
+
+.button {
+	border: 1px solid black;
+	box-shadow: 3px 3px 6px lightgray;
+	text-align: center;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	cursor: pointer;
+}
+
+.button:hover {
+	box-shadow: 0px 0px 0px white;
+}

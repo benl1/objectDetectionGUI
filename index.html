@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-    		<link rel="stylesheet" href="mainCSS.css">
-    		<title>Object detection GUI</title>
-  	</head>
-  	<body>
-    		<div id="root"></div>
-  	</body>
 
-  	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-  	<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-  	<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-  	<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
-  	<script src="notMain.jsx" type="text/babel"></script>
+<head>
+	<meta charset="UTF-8">
+	<!-- in the future, we might want to do per-scene styling -->
+	<link rel="stylesheet" href="./themes/mainCSS.css">
+	<title>Object detection GUI</title>
+</head>
+
+<body>
+	<!-- this div acts as the root for all the react components -->
+	<div id="root"></div>
+	<!-- trigger the entrypoint to all the react magic -->
+	<script type='text/javascript'>
+		require('./dist/entrypoint')
+	</script>
+</body>
+
 </html>

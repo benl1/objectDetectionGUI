@@ -1,15 +1,35 @@
 {
-  "name": "object-detection-app",
-  "productName": "Object Detection App",
-  "version": "0.1.0",
+  "name": "object-detection-gui",
+  "version": "0.0.1",
+  "description": "COMP 523 Spring '19 group project",
   "main": "main.js",
   "scripts": {
-    "start" : "electron ."
+    "entrypoint": "gulp entrypoint",
+    "image-choice-screen": "gulp image-choice-screen",
+    "control": "gulp control",
+    "transpile": "gulp default",
+    "electron": "electron ."
   },
-  "dependencies": {
-    "electron-packager": "^13.0.1"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benl1/objectDetectionGUI.git"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/benl1/objectDetectionGUI/issues"
+  },
+  "homepage": "https://github.com/benl1/objectDetectionGUI#readme",
   "devDependencies": {
-    "electron": "^4.0.3"
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "electron": "^4.0.5",
+    "gulp": "^4.0.0",
+    "gulp-babel": "^8.0.0",
+    "react": "^16.8.3",
+    "react-dom": "^16.8.3"
   }
 }
