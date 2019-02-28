@@ -4,8 +4,7 @@
   "description": "COMP 523 Spring '19 group project",
   "main": "main.js",
   "scripts": {
-    "transpile": "gulp transpile",
-    "start": "electron ."
+    "start": "gulp transpile && electron ."
   },
   "repository": {
     "type": "git",
