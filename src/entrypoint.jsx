@@ -28,6 +28,32 @@ function displaySceneSelectionScreen(app) {
 }
 
 function displayOutputScreen(app) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "http://127.0.0.1:5000/detect", false);
+
+    let imgPaths = app.images;
+    let imgs = [];
+    
+    function getPixels(url) {
+        var img = new Image();
+        img.src = url;
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d');
+        context.drawImage(img, 0, 0);
+        return context.getImageData(0, 0, canvas.width, canvas.height).data;
+    }
+
+    imgPaths.forEach(function(imgPath){
+        console.log(getPixels(imgPath))
+    })
+
+    xhttp.onreadystatechange = function() {
+        var response = JSON.parse(xhttp.responseText);
+        console.log(response);
+    }
+
+    xhttp.send();
+    
     ReactDOM.render(
         <OutputScreen app={app} />,
         document.getElementById('root')
