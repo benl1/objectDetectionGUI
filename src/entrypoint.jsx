@@ -4,6 +4,7 @@ import ImageChoiceScreen from './image_choice_screen/image_choice_screen';
 import App from './control/app';
 import SceneSelectionScreen from './scene_selection_screen/scene_selection_screen';
 import OutputScreen from './output_screen/output_screen';
+import { displayErrorDialog } from './control/dialogs';
 
 window.onload = () => {
     initialize();
@@ -33,7 +34,7 @@ function displayOutputScreen(app) {
 
     let imgPaths = app.images;
     let imgs = [];
-    
+
     function getPixels(url) {
         var img = new Image();
         img.src = url;
@@ -43,17 +44,23 @@ function displayOutputScreen(app) {
         return context.getImageData(0, 0, canvas.width, canvas.height).data;
     }
 
-    imgPaths.forEach(function(imgPath){
+    imgPaths.forEach(function (imgPath) {
         console.log(getPixels(imgPath))
     })
 
-    xhttp.onreadystatechange = function() {
+    xhttp.onreadystatechange = function () {
         var response = JSON.parse(xhttp.responseText);
         console.log(response);
     }
 
-    xhttp.send();
-    
+    // TODO: what do we want to do here? stay on the current screen? 
+    // TODO: go to the next one and render nothing?
+    try {
+        xhttp.send();
+    } catch (err) {
+        displayErrorDialog('failed to connect to server');
+    }
+
     ReactDOM.render(
         <OutputScreen app={app} />,
         document.getElementById('root')
