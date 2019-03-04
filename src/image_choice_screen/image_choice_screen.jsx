@@ -18,9 +18,15 @@ class ImageContainer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            // TODO: use this.props.app to initialize the images array
-            images: [], // an array of Image objects
+            images: [],
         }
+
+        let imgs = this.props.app.getImages();
+        if (imgs.length === 0) return;
+
+        imgs = imgs.map((src, idx) => <Image src={src} key={idx}/>);
+        // use this.state.images instead of setState because the component isn't mounted yet
+        this.state.images = imgs;
     }
 
     uploadImage() {

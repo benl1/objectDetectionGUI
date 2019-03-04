@@ -13,6 +13,18 @@ function displayYesNoDialog(message) {
     });
 }
 
+/**
+ * Displays a dialog box with one button labelled 'Ok'.
+ * @param {*} message The message to display to the user in the dialog box.
+ */
+function displayErrorDialog(message) {
+    dialog.showMessageBox({
+        type: 'error',
+        message: message,
+        buttons: ['OK']
+    });
+}
+
 function displayImageUploadDialog() {
     return dialog.showOpenDialog({
         properties: ['openFile'], // users can only upload one file at a time
@@ -20,4 +32,4 @@ function displayImageUploadDialog() {
     });
 }
 
-export { displayYesNoDialog, displayImageUploadDialog };
+export { displayYesNoDialog, displayErrorDialog, displayImageUploadDialog };
