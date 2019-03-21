@@ -30,7 +30,7 @@ function displaySceneSelectionScreen(app) {
 
 function displayOutputScreen(app) {
     var xhttp = new XMLHttpRequest();
-    xhttp.open("GET", "http://127.0.0.1:5000/detect", false);
+    xhttp.open("POST", "http://127.0.0.1:5000/detect", false);
 
     let imgPaths = app.images;
     let imgs = [];
@@ -43,20 +43,28 @@ function displayOutputScreen(app) {
         context.drawImage(img, 0, 0);
         return context.getImageData(0, 0, canvas.width, canvas.height).data;
     }
+    
+    let getArrayFromClampedArray = function(clampedArray) {
+        let x = [];
+        clampedArray.forEach((y) => x[x.length] = y);
+        return x;
+    }
 
     imgPaths.forEach(function (imgPath) {
-        console.log(getPixels(imgPath))
+        imgs[imgs.length] = getArrayFromClampedArray(getPixels(imgPath))
+	    console.log(getPixels(imgPath))
     })
 
     xhttp.onreadystatechange = function () {
         var response = JSON.parse(xhttp.responseText);
         console.log(response);
     }
-
+    xhttp.setRequestHeader("Content-Type", "application/json");
     // TODO: what do we want to do here? stay on the current screen? 
     // TODO: go to the next one and render nothing?
     try {
-        xhttp.send();
+	var obj = {scene: imgs[0], targets: [imgs[1]]}
+        xhttp.send(JSON.stringify(obj))
     } catch (err) {
         displayErrorDialog('failed to connect to server');
     }
