@@ -4,7 +4,8 @@ import torch
 import torchvision.models as models
 from torchvision import transforms as T
 import numpy as np
-
+import math
+import PIL
 app = Flask(__name__)
 model = 'avert your eyes'
 
@@ -43,12 +44,17 @@ class DummyNetwork(torch.nn.Module):
             Channel is RGB, so should be 3
             
         '''
+
+        topil = T.ToPILImage()
+
         #convert the images to the format the object deteciton model needs
         if not(self.scene_image_transform is None):
-            scene_image = self.scene_image_transform(scene_image.astype(np.float32))
+            #scene_image = T.ToPILImage()(scene_image.astype(np.uint8))
+            scene_image = topil(scene_image.astype(np.uint8))
+            scene_image = self.scene_image_transform(scene_image)
         if not(self.target_image_transform is None):
             transformed_target_images = []
-            for target_image in target_images: 
+            for target_image in target_images:
                 transformed_target_images.append(self.target_image_transform(target_image.astype(np.float32)))
 
         #concatenate the target images to a single matrix
@@ -64,10 +70,25 @@ class DummyNetwork(torch.nn.Module):
 
 @app.route('/detect', methods=['POST', 'GET'])
 def object_detector():
-    r = request.json
+    r = request.get_json()
+    #print(r['scene'])
+    print(type(r['scene']))
+    scene_image = np.array(r['scene'], np.float32)
+    true_scene_image = np.ndarray((math.floor((len(scene_image)/4)), 1, 3))
+    for index in range(0, len(scene_image)):
+        if index % 4 == 3:
+            continue
+        true_scene_image[math.floor(index / 4)][0][index % 4] = scene_image[index]
 
-    scene_image = np.array(r['scene'])
-    target_images = [np.array(i) for i in r['targets']]
+    target_images = [np.array(i, np.float32) for i in r['targets']]
+    true_target_images = []
+    for img in target_images:
+        true_target_image = np.ndarray((math.floor((len(img)/4)), 1, 3))
+        for index in range(0, len(img)):
+            if index % 4 == 3:
+                continue
+            true_target_image[math.floor(index / 4)][0][index % 4] = img[index]
+        true_target_images.append(true_target_image)
 
     #make blank images
     #scene_image = np.zeros((200,200,3))
@@ -76,12 +97,13 @@ def object_detector():
     #target_images.append(np.zeros((100,100,3)))
     #target_images.append(np.zeros((100,100,3)))
 
-    boxes,scores = model.do_object_detection(scene_image,target_images)
+    boxes,scores = model.do_object_detection(true_scene_image,true_target_images)
 
     returned = dict()
     returned['boxes'] = boxes
     returned['scores'] = scores
-
+    print("here1")
+    print(jsonify(returned))
     return jsonify(returned)
 
 def init_state():
