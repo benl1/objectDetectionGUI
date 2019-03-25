@@ -30,17 +30,17 @@ class ImageContainer extends React.Component {
     }
 
     uploadImage() {
-        let file_upload = displayImageUploadDialog();
+        const file_upload = displayImageUploadDialog();
         if (file_upload === undefined) return;
 
-        let key = this.props.app.addImage(file_upload); // notify the app that we've added a new image - it will give us a key
-        let imgs = this.state.images;
-        imgs.push(<Image key={key} src={file_upload} />);
+        const key = this.props.app.addImage(file_upload[0]); // notify the app that we've added a new image - it will give us a key
+        const imgs = this.state.images;
+        imgs.push(<Image key={key} src={file_upload[0]} />);
         this.setState({ images: imgs });
     }
 
     clearAllImages() {
-        let user_choice = displayYesNoDialog('Are you sure you want to remove all images?');
+        const user_choice = displayYesNoDialog('Are you sure you want to remove all images?');
 
         if (user_choice === 0) {
             this.props.app.removeAllImages(); // dump all images from the app
