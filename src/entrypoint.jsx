@@ -28,12 +28,13 @@ function displaySceneSelectionScreen(app) {
     );
 }
 
-function displayOutputScreen(app) {
+function displayOutputScreen(app, screen) {
     var xhttp = new XMLHttpRequest();
     xhttp.open("POST", "http://127.0.0.1:5000/detect", false);
 
     let imgPaths = app.images;
     let imgs = [];
+    let canvases = []
 
     function getPixels(url) {
         var img = new Image();
@@ -41,6 +42,9 @@ function displayOutputScreen(app) {
         var canvas = document.createElement('canvas');
         var context = canvas.getContext('2d');
         context.drawImage(img, 0, 0);
+        //test code
+        canvases[canvases.length] = canvas;
+        //test code end
         return context.getImageData(0, 0, canvas.width, canvas.height).data;
     }
     
@@ -52,12 +56,16 @@ function displayOutputScreen(app) {
 
     imgPaths.forEach(function (imgPath) {
         imgs[imgs.length] = getArrayFromClampedArray(getPixels(imgPath))
+        
 	    console.log(getPixels(imgPath))
     })
+    var self = this;
+    var display = null
 
     xhttp.onreadystatechange = function () {
-        var response = JSON.parse(xhttp.responseText);
-        console.log(response);
+        var response = JSON.parse(xhttp.responseText)
+        display = <OutputScreen app={app} canvases={canvases}/> 
+        console.log(response)
     }
     xhttp.setRequestHeader("Content-Type", "application/json");
     // TODO: what do we want to do here? stay on the current screen? 
@@ -68,9 +76,9 @@ function displayOutputScreen(app) {
     } catch (err) {
         displayErrorDialog('failed to connect to server');
     }
-
+    
     ReactDOM.render(
-        <OutputScreen app={app} />,
+        display,
         document.getElementById('root')
     );
 }
