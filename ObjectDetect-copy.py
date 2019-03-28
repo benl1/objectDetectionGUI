@@ -5,6 +5,7 @@ import PIL
 import torchvision.models as models
 from torchvision import transforms as T
 import numpy as np
+import datetime
 
 app = Flask(__name__)
 model = 'avert your eyes'
@@ -24,9 +25,10 @@ class DummyNetwork(torch.nn.Module):
     def forward(self, scene_image, target_images):
         # assumes images are already pytorch Tensors
         # run the images through the backbone model
+        print("start backboning")
         scene_features = self.backbone(scene_image)
         target_features = self.backbone(target_images)
-
+        print("end backboning")
         # in the real model we would do more computation for object detection
 
         # now just output something silly for testing purposes
@@ -101,8 +103,11 @@ def object_detector():
 
     scene = np.array(req['scene'])
     targets = [np.array(i) for i in req['targets']]
+    currentDT = datetime.datetime.now()
+    print("hi")
     boxes, scores = model.do_object_detection(scene, targets)
-
+    currentDT = datetime.datetime.now()
+    print("hi2")
     return jsonify({'boxes': boxes, 'scores': scores})
 
 
@@ -111,8 +116,9 @@ def init_state():
 
     # get gpu if available, otherwise use CPU
     # uncomment second line if you want to try to use a gpu
-    device = torch.device("cpu")
-    #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    #device = torch.device("cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(torch.cuda.is_available())
 
     # image transforms for converting from numpy to pytorch format
     scene_transform = T.Compose([
