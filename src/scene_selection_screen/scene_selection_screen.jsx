@@ -11,7 +11,7 @@ export default class SceneSelectionScreen extends React.Component {
     }
 
     outputScreenClick() {
-        console.log('are you a dumbass?? sure');
+       //jay said to delete this line
 
         // make sure that there is at least one target image before continuing
         if (this.props.app.images.length == 0) {
@@ -54,7 +54,7 @@ class SceneImage extends React.Component {
 
     render() {
         return(
-            <img src={this.state.imageUrl}></img>
+            <img className="sceneImage" src={this.props.url}></img>
         )
     }
 }
