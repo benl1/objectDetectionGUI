@@ -60,12 +60,57 @@ class SceneImage extends React.Component {
         )
     }
 }
+//var g = null;
+class WebcamCapture extends React.Component {
+    constructor(props) {
+        super(props)
+        //g = this;
+        this.setRef= this.setRef.bind(this)
+        this.capture = this.capture.bind(this)
+        this.state = {}
+    }
+
+    setRef(webcam) {
+      console.log(webcam)
+      console.log(this)
+      this.webcam = webcam;
+    }
+   
+    capture() {
+      const imageSrc = this.webcam.getScreenshot();
+      var image = <SceneImage url={imageSrc}></SceneImage>
+      this.setState({ss: image})
+    }
+   
+    render() {
+      const videoConstraints = {
+        width: 1280,
+        height: 720,
+        facingMode: "user"
+      };
+   
+      return (
+        <div>
+          <Webcam
+            audio={false}
+            height={350}
+            ref={this.setRef}
+            screenshotFormat="image/jpeg"
+            width={350}
+            videoConstraints={videoConstraints}
+          />
+          <button onClick={this.capture}>Capture photo</button>
+          {this.state.ss}
+        </div>
+      );
+    }
+  }
 
 class SceneSelectionContainer extends React.Component {
     constructor(props) {
-        super(props)
-        this.parent = props.parent
-        this.webcam = React.createRef()
+     super(props)
+     this.parent = props.parent
+
     }
 
     handleSceneImageUpload() {
@@ -103,6 +148,7 @@ class SceneSelectionContainer extends React.Component {
                 >
                     Use your webcam
                 </div>
+                <WebcamCapture></WebcamCapture>
             </div>
         );
     }
