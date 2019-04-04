@@ -44,6 +44,6 @@ gulp.task('control', () => {
 });
 
 gulp.task('transpile',
-    gulp.parallel('entrypoint', 'image-choice-screen', 'scene-selection-screen', 'output-screen', 'control'),
+    gulp.series('entrypoint', 'image-choice-screen', 'scene-selection-screen', 'output-screen', 'control'),
     (done) => done()
 );
