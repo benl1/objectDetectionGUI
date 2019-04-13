@@ -2,7 +2,6 @@ export default class App {
     constructor() {
         this.images = [];
         this.image_key = 0;
-        this.scene_image = '';
     }
 
     addImage(img_path) {
@@ -17,9 +16,5 @@ export default class App {
 
     getImages() {
         return this.images;
-    }
-
-    setSceneImage(img_path) {
-        this.scene_image = img_path;
     }
 }

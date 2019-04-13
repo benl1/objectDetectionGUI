@@ -1,14 +1,23 @@
 import React from 'react';
-import { displayYesNoDialog, displayImageUploadDialog } from '../control/dialogs';
+import { displayYesNoDialog, displayImageUploadDialog, displayErrorDialog } from '../control/dialogs';
 import { displaySceneSelectionScreen } from '../entrypoint';
 
 export default class ImageChoiceScreen extends React.Component {
+    handleSceneSelectionClick() {
+        // only allow the user to advance to the next screen if they have selected target image(s)
+        if (this.props.app.getImages().length > 0) {
+            displaySceneSelectionScreen(this.props.app);
+        } else {
+            displayErrorDialog('select at least one target image first');
+        }
+    }
+
     render() {
         return (
             <div>
                 <ImageChoiceScreenTitle />
                 <ImageContainer app={this.props.app} />
-                <div className='button' onClick={() => displaySceneSelectionScreen(this.props.app)}>Scene Selection</div>
+                <div className='button' onClick={() => this.handleSceneSelectionClick()}>Scene Selection</div>
             </div>
         );
     }
@@ -35,6 +44,7 @@ class ImageContainer extends React.Component {
 
         const key = this.props.app.addImage(file_upload[0]); // notify the app that we've added a new image - it will give us a key
         const imgs = this.state.images;
+
         imgs.push(<Image key={key} src={file_upload[0]} />);
         this.setState({ images: imgs });
     }
@@ -53,9 +63,7 @@ class ImageContainer extends React.Component {
             <div>
                 <UploadImageButton click={() => this.uploadImage()} />
                 <ClearAllImagesButton click={() => this.clearAllImages()} />
-                <div className='imageContainer'>
-                    {this.state.images}
-                </div>
+                <div className='imageContainer'>{this.state.images}</div>
             </div>
         );
     }
@@ -70,17 +78,13 @@ function Image(props) {
 }
 
 function UploadImageButton(props) {
-    return <div className='button'
-        onClick={() => props.click()}
-    >
+    return <div className='button' onClick={() => props.click()}>
         Upload an image
     </div>;
 }
 
 function ClearAllImagesButton(props) {
-    return <div className='button'
-        onClick={() => props.click()}
-    >
+    return <div className='button' onClick={() => props.click()}>
         Clear all images
     </div>;
 }

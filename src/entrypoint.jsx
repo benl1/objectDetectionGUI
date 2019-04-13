@@ -27,9 +27,9 @@ function displaySceneSelectionScreen(app) {
     );
 }
 
-function displayOutputScreen(app) {
+function displayOutputScreen(app, options) {
     ReactDOM.render(
-        <OutputScreen app={app} />,
+        <OutputScreen app={app} input_options={options} />,
         document.getElementById('root')
     );
 }
