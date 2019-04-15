@@ -77,28 +77,54 @@ class CroppingArea extends React.Component {
         };
     }
 
-    componentDidMount() {
+    setImage() {
         const canvas = this.canvas_ref.current;
         let img = new Image();
 
         img.onload = () => {
-            const half_width = img.width / 2;
-            const half_height = img.height / 2;
-            canvas.width = half_width;
-            canvas.height = half_height;
-            const gfx = canvas.getContext('2d');
-            gfx.drawImage(img, 0, 0, half_width * 2, half_height * 2, 0, 0, half_width, half_height);
+            this.redrawImage();
         };
         img.src = this.props.img_path;
+
+        let statePlus = this.state;
+        statePlus.srcImage = img;
+        this.state = statePlus;
+    }
+
+    redrawImage() {
+        const canvas = this.canvas_ref.current;
+        const ctx = canvas.getContext('2d');
+
+        let state = this.state;
+        let img = this.state.srcImage;
+
+        //redraw
+        const half_width = img.width / 2;
+        const half_height = img.height / 2;
+        canvas.width = half_width;
+        canvas.height = half_height;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, half_width * 2, half_height * 2, 0, 0, half_width, half_height);
+    }
+
+    componentDidMount() {
+        this.setImage();
+    }
+
+    componentDidUpdate(){
+        this.setImage();
     }
 
     handleAreaSelection(event) {
         const canvas = this.canvas_ref.current;
         const ctx = canvas.getContext('2d');
+        let state = this.state;
+
+        this.redrawImage();
+
         ctx.fillStyle = 'red';
         ctx.strokeStyle = 'red';
 
-        let state = this.state;
 
         if (!this.state.one_crop_click) {
             const rect = event.target.getBoundingClientRect();
@@ -107,7 +133,7 @@ class CroppingArea extends React.Component {
             
             state.one_click_point = {x:x,y:y};
             state.one_crop_click = true;
-            this.setState(state);
+            this.state = state;
 
             ctx.fillRect(x, y, 5, 5);
         } else {
@@ -125,7 +151,8 @@ class CroppingArea extends React.Component {
             ctx.stroke()
 
             state.one_crop_click = false;
-            this.setState(state)
+            state.two_click_point = {x:secondX, y: secondY};
+            this.state = state;
         }
     }
 
@@ -140,7 +167,36 @@ class CroppingArea extends React.Component {
     }
 
     handleCropCapture() {
+        let state = this.state;
+        let canvas = this.canvas_ref.current;
 
+        //first remove red lines
+        this.redrawImage();
+
+        if (!state.one_click_point || !state.two_click_point){
+            displayErrorDialog("You need to choose two points before cropping.")
+        } else {
+            let fp = state.one_click_point, sp = state.two_click_point;
+            let width = Math.abs(fp.x - sp.x), height = Math.abs(fp.y - sp.y);
+            
+            let cv = document.createElement("canvas");
+            cv.width = width; cv.height = height;
+
+            let ctx = cv.getContext('2d');
+
+            ctx.drawImage(canvas, Math.min(fp.x, sp.x), Math.min(fp.y, sp.y), width, height,
+                0, 0, width, height);
+            
+            let dataPath = cv.toDataURL();
+
+            const junk_parent = this.props.death;
+            // notify the app that we've added a new image - it will give us a key
+            const key = junk_parent.props.app.addImage(dataPath);
+            const imgs = junk_parent.state.images;
+    
+            imgs.push(<RImage key={key} src={dataPath} />);
+            junk_parent.setState({ images: imgs, showCroppingArea: false });
+        }
     }
 
     render() {
