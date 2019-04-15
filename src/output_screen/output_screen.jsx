@@ -74,32 +74,18 @@ class OutputScreenContainer extends React.Component {
                 const scene = produceRGBArray(ctx.getImageData(0, 0, canvas.width, canvas.height));
                 xhttp.send(JSON.stringify({ scene: scene, targets: target_images }));
             } else if (this.props.input_options.input == 'webcam') {
-                navigator.mediaDevices.getUserMedia(this.props.input_options.media_options)
-                    .then(stream => {
-                        const track = stream.getVideoTracks()[0];
-                        const track_settings = track.getSettings();
-                        const image_capture = new ImageCapture(track);
+                const canvas = this.canvas_ref.current;
+                canvas.width = this.props.input_options.width;
+                canvas.height = this.props.input_options.height;
 
-                        // just take a frame from the video element:
-                        image_capture.grabFrame()
-                            .then(frame => {
-                                // set the canvas to the width and height of the current image we are taking in
-                                const canvas = this.canvas_ref.current;
-                                canvas.width = track_settings.width;
-                                canvas.height = track_settings.height;
+                // draw the image to the canvas
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(this.props.input_options.img, 0, 0);
 
-                                // draw the image to the canvas
-                                const ctx = canvas.getContext('2d');
-                                ctx.drawImage(frame, 0, 0);
-
-                                // produce an RGB array from the image drawn to the canvas and send it along
-                                // to the server for object detection
-                                const scene = produceRGBArray(ctx.getImageData(0, 0, canvas.width, canvas.height));
-                                xhttp.send(JSON.stringify({ scene: scene, targets: [scene] }));
-                            })
-                            .catch(err => console.error(err));
-                    })
-                    .catch(err => console.error(err));
+                // produce an RGB array from the image drawn to the canvas and send it along
+                // to the server for object detection
+                const scene = produceRGBArray(ctx.getImageData(0, 0, canvas.width, canvas.height));
+                xhttp.send(JSON.stringify({ scene: scene, targets: [scene] }));
             }
         } catch (err) {
             console.log(err);
