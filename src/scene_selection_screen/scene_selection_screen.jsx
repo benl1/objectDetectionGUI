@@ -112,7 +112,10 @@ class WebcamOutput extends React.Component {
 
     componentWillUnmount() {
         this.g = false;
-        this.track.stop();
+        if (this.track){
+            this.track.stop();
+        }
+        
     }
     
     render() {

@@ -79,6 +79,7 @@ class DummyNetwork(torch.nn.Module):
 
 @app.route('/detect', methods=['POST'])
 def object_detector():
+    print("in endpoint")
     req = request.json
 
     # send a 400 if the scene image isn't provided
