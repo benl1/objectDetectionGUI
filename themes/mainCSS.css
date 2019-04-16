@@ -58,3 +58,16 @@ div.imageContainer {
 	height: 300px;
 	width: 300px;
 }
+
+.videoOutput {
+	display: flex;
+	flex-direction: row;
+	flex-grow: 1;
+	width: 100%;
+	height: 50%;
+}
+
+.outputParent {
+	width: 100%;
+	height: 100%;
+}

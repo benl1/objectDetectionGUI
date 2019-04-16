@@ -2,7 +2,7 @@ import { displayImageChoiceScreen, displayOutputScreen } from '../entrypoint';
 import { displayYesNoDialog, displayImageUploadDialog, displayErrorDialog } from '../control/dialogs';
 import React from 'react';
 
-export default class SceneSelectionScreen extends React.Component {
+class SceneSelectionScreen extends React.Component {
     render() {
         return (
             <div>
@@ -40,6 +40,12 @@ class SceneSelectionContainer extends React.Component {
         this.setState({showPictureTaker: true})
     }
 
+    handleVideo(){
+        displayOutputScreen(this.props.app, {
+            input: 'video'
+        });
+    }
+
     render() {
         return (
             <div>
@@ -49,19 +55,25 @@ class SceneSelectionContainer extends React.Component {
                 <div className='button' onClick={() => this.handleWebcam()}>
                     Take a picture
                 </div>
+                <div className='button' onClick={() => this.handleVideo()}>
+                    Take a video
+                </div>
                 {this.state.showPictureTaker ? <PictureTaker app={this.props.app}></PictureTaker> : null}
             </div>
         );
     }
 }
-var g = true
+
 class WebcamOutput extends React.Component {
     constructor(props){
         super(props)
         this.canvas_ref = React.createRef();
         this.state = {
-            currentImg: null
+            currentImg: null,
+            width: props.width,
+            height: props.height
         };
+        this.g = true
     }
 
     componentDidMount() {
@@ -70,23 +82,27 @@ class WebcamOutput extends React.Component {
             video: true, 
             audio: false
         };
+        let state = this.state;
+        let self = this;
         navigator.mediaDevices.getUserMedia(prop)
                     .then(stream => {
                         const track = stream.getVideoTracks()[0];
+                        self.track = track;
                         const track_settings = track.getSettings();
                         const image_capture = new ImageCapture(track);
                         
                         const drawFrame = function(){
                             image_capture.grabFrame().then((imgData) => {
-                                canvas.width = track_settings.width;
-                                canvas.height = track_settings.height;
+                                canvas.width = state.width;
+                                canvas.height = state.height;
                                 const ctx = canvas.getContext('2d');
-                                ctx.drawImage(imgData, 0, 0);
-                            })
+                                ctx.drawImage(imgData, 0, 0, canvas.width, canvas.height, 0, 0, state.width, state.height);
+                                //ctx.drawImage(imgData, 0, 0);
+                            }).catch((e) => {})
 
                             const msis = 1000;
                             const target_frame_rate = 19.0;
-                            if (g) setTimeout(drawFrame, msis / target_frame_rate);
+                            if (self.g) setTimeout(drawFrame, msis / target_frame_rate);
                         }
                         
                         drawFrame();
@@ -94,8 +110,11 @@ class WebcamOutput extends React.Component {
                     }).catch((e) => {console.error(e)})
     }
 
-    componentWillUnmount(){g=false}
-
+    componentWillUnmount() {
+        this.g = false;
+        this.track.stop();
+    }
+    
     render() {
         return (
             <canvas ref={this.canvas_ref}></canvas> 
@@ -107,7 +126,7 @@ class PictureTaker extends React.Component {
     render() {
         return (
             <div>
-                <WebcamOutput></WebcamOutput>
+                <WebcamOutput width={500} height={500}></WebcamOutput>
                 <div className='button' onClick={() => {this.takePicture()}}> Grab Frame </div>
             </div>
         )
@@ -121,7 +140,7 @@ class PictureTaker extends React.Component {
         // list all the media devices (audio in, out, video in, screen-capture, etc.)
         // for now, i'm just passing the first media device as the one that's been selected
         // along with some basic properties such as height and width
-        
+        let self = this;
         navigator.mediaDevices.enumerateDevices()
             .then(devices => {
                 const video_devices = devices.filter(device => (device.kind === 'videoinput'));
@@ -159,3 +178,5 @@ class PictureTaker extends React.Component {
 function SceneSelectionScreenTitle(props) {
     return <h3>Select scene imagery source</h3>;
 }
+
+export {SceneSelectionScreen, WebcamOutput};

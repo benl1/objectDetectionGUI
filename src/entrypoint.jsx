@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ImageChoiceScreen from './image_choice_screen/image_choice_screen';
-import SceneSelectionScreen from './scene_selection_screen/scene_selection_screen';
+import {SceneSelectionScreen} from './scene_selection_screen/scene_selection_screen';
 import OutputScreen from './output_screen/output_screen';
 import App from './control/app';
 

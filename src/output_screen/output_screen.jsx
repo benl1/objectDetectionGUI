@@ -2,6 +2,7 @@ import { displayImageChoiceScreen, displaySceneSelectionScreen } from '../entryp
 import { getImageDataFromURL, produceRGBArray } from '../control/imageops';
 import { displayErrorDialog } from '../control/dialogs';
 import React from 'react';
+import { WebcamOutput } from '../scene_selection_screen/scene_selection_screen';
 
 export default class OutputScreen extends React.Component {
     render() {
@@ -32,7 +33,7 @@ class OutputScreenContainer extends React.Component {
         this.props.app.images.forEach(img_path => target_images.push(produceRGBArray(getImageDataFromURL(img_path))));
     
         // setup the XHR
-        xhttp.open('POST', 'http://127.0.0.1:5000/detect', false);
+        xhttp.open('POST', 'http://127.0.0.1:5000/detect', true);
         xhttp.setRequestHeader('Content-Type', 'application/json');
         xhttp.onreadystatechange = () => {
             if (xhttp.readyState === XMLHttpRequest.DONE && xhttp.status === 200) {
@@ -55,24 +56,26 @@ class OutputScreenContainer extends React.Component {
             } else if (xhttp.status === 400) {
                 displayErrorDialog('server responded with 400.');
             } else {
-                displayErrorDialog(`status: ${xhttp.status}, text: ${xhttp.responseText}`);
+               // displayErrorDialog(`status: ${xhttp.status}, text: ${xhttp.responseText}`);
             }
         };
-    
+        let self = this;
         try {
             if (this.props.input_options.input == 'scene_image') {
                 const tmp_img = new Image();
+                tmp_img.onload = function(){
+
+                    const canvas = self.canvas_ref.current;
+                    canvas.width = tmp_img.width;
+                    canvas.height = tmp_img.height;
+    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(tmp_img, 0, 0);
+    
+                    const scene = produceRGBArray(ctx.getImageData(0, 0, canvas.width, canvas.height));
+                    xhttp.send(JSON.stringify({ scene: scene, targets: target_images }));
+                }
                 tmp_img.src = this.props.input_options.path;
-
-                const canvas = this.canvas_ref.current;
-                canvas.width = tmp_img.width;
-                canvas.height = tmp_img.height;
-
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(tmp_img, 0, 0);
-
-                const scene = produceRGBArray(ctx.getImageData(0, 0, canvas.width, canvas.height));
-                xhttp.send(JSON.stringify({ scene: scene, targets: target_images }));
             } else if (this.props.input_options.input == 'webcam') {
                 const canvas = this.canvas_ref.current;
                 canvas.width = this.props.input_options.width;
@@ -86,6 +89,8 @@ class OutputScreenContainer extends React.Component {
                 // to the server for object detection
                 const scene = produceRGBArray(ctx.getImageData(0, 0, canvas.width, canvas.height));
                 xhttp.send(JSON.stringify({ scene: scene, targets: [scene] }));
+            } else if (this.props.input_options.input == 'video') {
+                
             }
         } catch (err) {
             console.log(err);
@@ -95,6 +100,31 @@ class OutputScreenContainer extends React.Component {
     }
 
     render() {
-        return <canvas ref={this.canvas_ref} />;
+        return (
+            <div className='outputParent'>
+                <canvas ref={this.canvas_ref} />
+                {this.props.input_options.input == 'video' ? <div className='videoOutput'>
+                    <WebcamOutput width={450} height={450}></WebcamOutput>
+                    <RealTimeVideo width={450} height={450}></RealTimeVideo>
+                </div> : null}
+            </div>
+            );
+    }
+}
+
+class RealTimeVideo extends React.Component {
+    constructor(props){
+        super(props);
+        
+    }
+
+    render() {
+        return (
+            <div>
+
+
+            </div>
+            
+            )
     }
 }
