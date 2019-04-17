@@ -21,6 +21,8 @@ class OutputScreenContainer extends React.Component {
         super(props);
         this.canvas_ref = React.createRef();
         this.output_canvas_ref = React.createRef();
+        this.webcamOutputRef = React.createRef();
+        this.realtimevideoRef = React.createRef(); 
     }
 
     /**
@@ -58,8 +60,8 @@ class OutputScreenContainer extends React.Component {
                     const confidence = response['scores'][i];
                     const height = bot_y - top_y;
 
-                    //ctxOut.strokeRect(top_x, top_y, bot_x, bot_y);
-                    //ctxOut.strokeText(`${confidence}`, top_x + 5, top_y + height / 2);
+                    ctxOut.strokeRect(top_x, top_y, bot_x, bot_y);
+                    ctxOut.strokeText(`${confidence}`, top_x + 5, top_y + height / 2);
                 }
             } else if (xhttp.status === 400) {
                 displayErrorDialog('server responded with 400.');
@@ -74,12 +76,15 @@ class OutputScreenContainer extends React.Component {
                 tmp_img.onload = function(){
 
                     const canvas = self.canvas_ref.current;
-                    canvas.width = tmp_img.width;
+                    
                     canvas.height = tmp_img.height;
-    
+
+                    canvas.width = window.innerWidth * .5;
+                    canvas.height = window.innerHeight * .75;
+
                     const ctx = canvas.getContext('2d');
-                    ctx.drawImage(tmp_img, 0, 0, canvas.width, canvas.height, 0, 0, 450, 450);
-    
+                    ctx.drawImage(tmp_img, 0, 0, canvas.width, canvas.height);
+                    
                     const scene = produceRGBArray(ctx.getImageData(0, 0, canvas.width, canvas.height));
                     xhttp.send(JSON.stringify({ scene: scene, targets: target_images }));
                 }
@@ -107,19 +112,50 @@ class OutputScreenContainer extends React.Component {
         }
     }
 
+    handleFrame(imgData) {
+        let rtvComp = this.realtimevideoRef.current;
+        
+        //first we need to prepare the rest call
+        const xhttp = new XMLHttpRequest();
+        const target_images = [];
+    
+        // convert image paths to arrays of image data
+        this.props.app.images.forEach(img_path => target_images.push(produceRGBArray(getImageDataFromURL(img_path))));
+
+        xhttp.open('POST', 'http://127.0.0.1:5000/detect', true);
+        xhttp.setRequestHeader('Content-Type', 'application/json');
+
+        xhttp.onreadystatechange = () => {
+            if (xhttp.readyState === XMLHttpRequest.DONE && xhttp.status === 200) {
+              rtvComp.showFrame(imgData);
+            } else if (xhttp.status === 400) {
+                displayErrorDialog('server responded with 400.');
+            } else {
+               // displayErrorDialog(`status: ${xhttp.status}, text: ${xhttp.responseText}`);
+            }
+        };
+        let tempCanvas = document.createElement("canvas");
+        tempCanvas.width = imgData.width; tempCanvas.height=imgData.height;
+        let tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(imgData, 0, 0, tempCanvas.width, tempCanvas.height);
+        const scene = produceRGBArray(tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height));
+        xhttp.send(JSON.stringify({ scene: scene, targets: target_images }));
+        //console.log(rtvComp);
+    }
+
     render() {
         if (this.props.input_options.input === 'scene_image' || this.props.input_options.input === 'webcam') {
             return (
                 <div className='videoOutput'>
-                    <canvas ref={this.canvas_ref}/> 
-                    <canvas ref={this.output_canvas_ref}/>
+                    <canvas className='dontGrow' ref={this.canvas_ref}/> 
+                    <canvas className='dontGrow' ref={this.output_canvas_ref}/>
                 </div>
             );
         } else {
             return (
                 <div className='videoOutput'>
-                    <WebcamOutput width={450} height={450}></WebcamOutput>
-                    <RealTimeVideo width={450} height={450}></RealTimeVideo>
+                    <WebcamOutput ref={this.webcamOutputRef} parent={this} width={window.innerWidth * .5} height={window.innerHeight * .75}></WebcamOutput>
+                    <RealTimeVideo parent={this} ref={this.realtimevideoRef} width={window.innerWidth * .5} height={window.innerHeight * .75}></RealTimeVideo>
                 </div>
             );
         }
@@ -136,7 +172,25 @@ class RealTimeVideo extends React.Component {
     }
 
     componentDidMount(){
+        let canvas = this.canvas_ref.current;
 
+        canvas.width = window.innerWidth * .5;
+        canvas.height = window.innerHeight * .75;
+
+        let ctx = canvas.getContext('2d');
+        let load = new Image();
+        
+
+        load.onload = function(){
+            ctx.drawImage(load, 0, 0, canvas.width, canvas.height);
+        }
+        load.src = "./assets/loading.png";
+    }
+    
+    showFrame(imgData){
+        let canvas = this.canvas_ref.current;
+        let ctx = canvas.getContext('2d');
+        ctx.drawImage(imgData, 0, 0, canvas.width, canvas.height);
     }
 
     render() {

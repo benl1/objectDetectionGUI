@@ -26,8 +26,8 @@ class DummyNetwork(torch.nn.Module):
         # assumes images are already pytorch Tensors
         # run the images through the backbone model
         print("start backboning")
-        scene_features = self.backbone(scene_image)
-        target_features = self.backbone(target_images)
+        #scene_features = self.backbone(scene_image)
+        #target_features = self.backbone(target_images)
         print("end backboning")
         # in the real model we would do more computation for object detection
 
