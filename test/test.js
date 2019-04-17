@@ -4,6 +4,7 @@ const electronPath = require('electron') // Require Electron from the binaries i
 const path = require('path')
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
+// const ImageChoice = require('../src/image_choice_screen/image_choice_screen.jsx');
 
 const app = new Application({
   path: electronPath,
@@ -35,9 +36,14 @@ describe('Tests', function () {
       // Please note that getWindowCount() will return 2 if `dev tools` are opened.
       //assert.equal(wc, 2)
 
-      return app.client.waitUntilWindowLoaded()
-        .getWindowCount().should.eventually.equal(1);
+    return app.client.waitUntilWindowLoaded()
+      .getWindowCount().should.eventually.equal(1);
 
+  });
+
+  it('test upload button', async() => {
+    // await app.client.click(ImageChoice.UploadImageButton).element(ImageChoice.file_upload).should.eventually.exist;
+    return app.client.click('#upload_image_button')
   });
 
     // it('clear images brings up pop-up', () => {

@@ -235,7 +235,7 @@ function RImage(props) {
 }
 
 function UploadImageButton(props) {
-    return <div className='button' onClick={() => props.click()}>
+    return <div className='button' onClick={() => props.click()} id = 'upload_image_button'>
         Upload an image
     </div>;
 }
