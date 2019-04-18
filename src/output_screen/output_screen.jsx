@@ -23,6 +23,12 @@ class OutputScreenContainer extends React.Component {
         this.output_canvas_ref = React.createRef();
         this.webcamOutputRef = React.createRef();
         this.realtimevideoRef = React.createRef(); 
+
+        this.processingFrame = false;
+        this.inputQueue = [];
+        this.outputQueue = [];
+
+        this.firstFrame = true;
     }
 
     /**
@@ -34,6 +40,7 @@ class OutputScreenContainer extends React.Component {
     
         // convert image paths to arrays of image data
         this.props.app.images.forEach(img_path => target_images.push(produceRGBArray(getImageDataFromURL(img_path))));
+        this.targetsProcessed = target_images;
     
         // setup the XHR
         xhttp.open('POST', 'http://127.0.0.1:5000/detect', true);
@@ -112,22 +119,41 @@ class OutputScreenContainer extends React.Component {
         }
     }
 
-    handleFrame(imgData) {
+    handleFrame(imgData){
+        this.inputQueue.push(imgData);
+        if (this.firstFrame){
+            this.processFrame(imgData);
+            this.firstFrame = false;
+        }
+        
+    }
+
+    processFrame(imgData) {
+        this.processingFrame = true;
         let rtvComp = this.realtimevideoRef.current;
         
         //first we need to prepare the rest call
         const xhttp = new XMLHttpRequest();
-        const target_images = [];
-    
-        // convert image paths to arrays of image data
-        this.props.app.images.forEach(img_path => target_images.push(produceRGBArray(getImageDataFromURL(img_path))));
+        let target_images = this.targetsProcessed;
+        
 
         xhttp.open('POST', 'http://127.0.0.1:5000/detect', true);
         xhttp.setRequestHeader('Content-Type', 'application/json');
 
+        let self = this;
+
         xhttp.onreadystatechange = () => {
             if (xhttp.readyState === XMLHttpRequest.DONE && xhttp.status === 200) {
+                console.log("got frame back")
               rtvComp.showFrame(imgData);
+              self.inputQueue.pop();
+              self.outputQueue.unshift(imgData);
+              if (self.inputQueue.length > 0) {
+                self.processFrame(self.inputQueue[self.inputQueue.length - 1]);
+              } else {
+                  setTimeout(() => {self.processFrame(self.inputQueue[self.inputQueue.length - 1])}, 100);
+              }
+              self.processingFrame = false;
             } else if (xhttp.status === 400) {
                 displayErrorDialog('server responded with 400.');
             } else {

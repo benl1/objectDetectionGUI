@@ -25,10 +25,10 @@ class DummyNetwork(torch.nn.Module):
     def forward(self, scene_image, target_images):
         # assumes images are already pytorch Tensors
         # run the images through the backbone model
-        print("start backboning")
+        #print("start backboning")
         #scene_features = self.backbone(scene_image)
         #target_features = self.backbone(target_images)
-        print("end backboning")
+        #print("end backboning")
         # in the real model we would do more computation for object detection
 
         # now just output something silly for testing purposes
@@ -79,36 +79,41 @@ class DummyNetwork(torch.nn.Module):
 
 @app.route('/detect', methods=['POST'])
 def object_detector():
-    print("in endpoint")
-    req = request.json
-
+    print("new connection")
+    #request.json
+    request.get_data()
     # send a 400 if the scene image isn't provided
-    if 'scene' not in req:
-        app.make_response(
-            (
-                'no scene image provided',
-                400,
-                {'mimetype': 'application/json'}
-            )
-        )
+    # if 'scene' not in req:
+    #     app.make_response(
+    #         (
+    #             'no scene image provided',
+    #             400,
+    #             {'mimetype': 'application/json'}
+    #         )
+    #     )
 
     # send a 400 if the target image(s) aren't provided
-    if 'targets' not in req:
-        app.make_response(
-            (
-                'no target images provided',
-                400,
-                {'mimetype': 'application/json'}
-            )
-        )
+    # if 'targets' not in req:
+    #     app.make_response(
+    #         (
+    #             'no target images provided',
+    #             400,
+    #             {'mimetype': 'application/json'}
+    #         )
+    #     )
+    print("start p")
+    #scene = np.array(req['scene'])
+    #targets = [np.array(i) for i in req['targets']]
+    
+    
+    #num_rows = scene.shape[2]
+    #num_cols = scene.shape[3]
 
-    scene = np.array(req['scene'])
-    targets = [np.array(i) for i in req['targets']]
-    currentDT = datetime.datetime.now()
-    print("hi")
-    boxes, scores = model.do_object_detection(scene, targets)
-    currentDT = datetime.datetime.now()
-    print("hi2")
+    boxes = [[0, 0, 5, 100],
+                [6, 50, 200, 150]]
+    scores = [.8, .4]
+    
+    print("end p")
     return jsonify({'boxes': boxes, 'scores': scores})
 
 

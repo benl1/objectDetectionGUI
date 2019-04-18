@@ -87,12 +87,15 @@ class WebcamOutput extends React.Component {
         let props = this.props
         navigator.mediaDevices.getUserMedia(prop)
                     .then(stream => {
-                        const track = stream.getVideoTracks()[0];
-                        self.track = track;
-                        const track_settings = track.getSettings();
-                        const image_capture = new ImageCapture(track);
+                        
                         
                         const drawFrame = function(){
+                            //test idea
+                            const track = stream.getVideoTracks()[0];
+                            self.track = track;
+                            const track_settings = track.getSettings();
+                            const image_capture = new ImageCapture(track);
+
                             image_capture.grabFrame().then((imgData) => {
                                 canvas.width = state.width;
                                 canvas.height = state.height;
@@ -101,12 +104,13 @@ class WebcamOutput extends React.Component {
 
                                 if (!!props.parent && !!props.parent.handleFrame) {
                                     props.parent.handleFrame(imgData)
+                                   // console.log("processing frame");
                                 }
                                 //ctx.drawImage(imgData, 0, 0);
                             })
 
                             const msis = 1000;
-                            const target_frame_rate = .3;
+                            const target_frame_rate = 19;
                             if (self.g) setTimeout(drawFrame, msis / target_frame_rate);
                         }
                         
