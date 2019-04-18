@@ -8,7 +8,7 @@ export default class OutputScreen extends React.Component {
     render() {
         return (
             <div>
-                <OutputScreenContainer app={this.props.app} input_options={this.props.input_options}/>
+                <OutputScreenContainer app={this.props.app} input_options={this.props.input_options} />
                 <div className='button' onClick={() => displayImageChoiceScreen(this.props.app)}>Image choice</div>
                 <div className='button' onClick={() => displaySceneSelectionScreen(this.props.app)}>Scene selection</div>
             </div>
@@ -22,26 +22,45 @@ class OutputScreenContainer extends React.Component {
         this.canvas_ref = React.createRef();
         this.output_canvas_ref = React.createRef();
         this.webcamOutputRef = React.createRef();
-        this.realtimevideoRef = React.createRef(); 
+        this.realtimevideoRef = React.createRef();
 
         this.processingFrame = false;
         this.inputQueue = [];
         this.outputQueue = [];
 
         this.firstFrame = true;
+        this.state = {
+            video_width: 0,
+            video_height: 0,
+        }
     }
 
-    /**
-     * The changes made here are based on this link: 
-     */
+    // test resize handler
+    resizeHandler() {
+        console.log('window resize');
+        const video_width = window.innerWidth * .5;
+        const video_height = window.innerHeight * .75;
+        console.log(`new component width: ${video_width}, height: ${video_height}`);
+        this.setState({
+            video_width: video_width,
+            video_height: video_height,
+        });
+    }
+    // end test resize handler
+
     componentDidMount() {
+        // this is a test for window resizing
+        this.resizeHandler();
+        window.addEventListener('resize', () => this.resizeHandler());
+        // end window resizing test
+
         const xhttp = new XMLHttpRequest();
         const target_images = [];
-    
+
         // convert image paths to arrays of image data
         this.props.app.images.forEach(img_path => target_images.push(produceRGBArray(getImageDataFromURL(img_path))));
         this.targetsProcessed = target_images;
-    
+
         // setup the XHR
         xhttp.open('POST', 'http://127.0.0.1:5000/detect', true);
         xhttp.setRequestHeader('Content-Type', 'application/json');
@@ -49,11 +68,7 @@ class OutputScreenContainer extends React.Component {
             if (xhttp.readyState === XMLHttpRequest.DONE && xhttp.status === 200) {
                 const response = JSON.parse(xhttp.responseText);
                 const cv = this.canvas_ref.current;
-                const ctx = this.canvas_ref.current.getContext('2d');
                 const num_boxes = response['boxes'].length;
-                console.log(response);
-
-                
 
                 const cvOut = this.output_canvas_ref.current;
                 const ctxOut = cvOut.getContext('2d');
@@ -73,25 +88,23 @@ class OutputScreenContainer extends React.Component {
             } else if (xhttp.status === 400) {
                 displayErrorDialog('server responded with 400.');
             } else {
-               // displayErrorDialog(`status: ${xhttp.status}, text: ${xhttp.responseText}`);
+                // displayErrorDialog(`status: ${xhttp.status}, text: ${xhttp.responseText}`);
             }
         };
-        let self = this;
+        const self = this;
         try {
             if (this.props.input_options.input == 'scene_image') {
                 const tmp_img = new Image();
-                tmp_img.onload = function(){
-
+                tmp_img.onload = function () {
                     const canvas = self.canvas_ref.current;
-                    
-                    canvas.height = tmp_img.height;
-
-                    canvas.width = window.innerWidth * .5;
-                    canvas.height = window.innerHeight * .75;
+                    // canvas.width = window.innerWidth * .5;
+                    // canvas.height = window.innerHeight * .75;
+                    canvas.width = this.state.video_width;
+                    canvas.heigth = this.state.video_height;
 
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(tmp_img, 0, 0, canvas.width, canvas.height);
-                    
+
                     const scene = produceRGBArray(ctx.getImageData(0, 0, canvas.width, canvas.height));
                     xhttp.send(JSON.stringify({ scene: scene, targets: target_images }));
                 }
@@ -110,7 +123,7 @@ class OutputScreenContainer extends React.Component {
                 const scene = produceRGBArray(ctx.getImageData(0, 0, canvas.width, canvas.height));
                 xhttp.send(JSON.stringify({ scene: scene, targets: [scene] }));
             } else if (this.props.input_options.input == 'video') {
-                
+
             }
         } catch (err) {
             console.log(err);
@@ -119,49 +132,49 @@ class OutputScreenContainer extends React.Component {
         }
     }
 
-    handleFrame(imgData){
+    componentWillUnmount() {
+        window.removeEventListener('resize', () => this.resizeHandler());
+    }
+
+    handleFrame(imgData) {
         this.inputQueue.push(imgData);
-        if (this.firstFrame){
+        if (this.firstFrame) {
             this.processFrame(imgData);
             this.firstFrame = false;
         }
-        
     }
 
     processFrame(imgData) {
         this.processingFrame = true;
         let rtvComp = this.realtimevideoRef.current;
-        
+
         //first we need to prepare the rest call
         const xhttp = new XMLHttpRequest();
         let target_images = this.targetsProcessed;
-        
 
         xhttp.open('POST', 'http://127.0.0.1:5000/detect', true);
         xhttp.setRequestHeader('Content-Type', 'application/json');
 
         let self = this;
-
         xhttp.onreadystatechange = () => {
             if (xhttp.readyState === XMLHttpRequest.DONE && xhttp.status === 200) {
-                console.log("got frame back")
-              rtvComp.showFrame(imgData);
-              self.inputQueue.pop();
-              self.outputQueue.unshift(imgData);
-              if (self.inputQueue.length > 0) {
-                self.processFrame(self.inputQueue[self.inputQueue.length - 1]);
-              } else {
-                  setTimeout(() => {self.processFrame(self.inputQueue[self.inputQueue.length - 1])}, 100);
-              }
-              self.processingFrame = false;
+                rtvComp.showFrame(imgData);
+                self.inputQueue.pop();
+                self.outputQueue.unshift(imgData);
+                if (self.inputQueue.length > 0) {
+                    self.processFrame(self.inputQueue[self.inputQueue.length - 1]);
+                } else {
+                    setTimeout(() => { self.processFrame(self.inputQueue[self.inputQueue.length - 1]) }, 100);
+                }
+                self.processingFrame = false;
             } else if (xhttp.status === 400) {
                 displayErrorDialog('server responded with 400.');
             } else {
-               // displayErrorDialog(`status: ${xhttp.status}, text: ${xhttp.responseText}`);
+                // displayErrorDialog(`status: ${xhttp.status}, text: ${xhttp.responseText}`);
             }
         };
         let tempCanvas = document.createElement("canvas");
-        tempCanvas.width = imgData.width; tempCanvas.height=imgData.height;
+        tempCanvas.width = imgData.width; tempCanvas.height = imgData.height;
         let tempCtx = tempCanvas.getContext('2d');
         tempCtx.drawImage(imgData, 0, 0, tempCanvas.width, tempCanvas.height);
         const scene = produceRGBArray(tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height));
@@ -173,15 +186,15 @@ class OutputScreenContainer extends React.Component {
         if (this.props.input_options.input === 'scene_image' || this.props.input_options.input === 'webcam') {
             return (
                 <div className='videoOutput'>
-                    <canvas className='dontGrow' ref={this.canvas_ref}/> 
-                    <canvas className='dontGrow' ref={this.output_canvas_ref}/>
+                    <canvas className='dontGrow' ref={this.canvas_ref} />
+                    <canvas className='dontGrow' ref={this.output_canvas_ref} />
                 </div>
             );
         } else {
             return (
                 <div className='videoOutput'>
-                    <WebcamOutput ref={this.webcamOutputRef} parent={this} width={window.innerWidth * .5} height={window.innerHeight * .75}></WebcamOutput>
-                    <RealTimeVideo parent={this} ref={this.realtimevideoRef} width={window.innerWidth * .5} height={window.innerHeight * .75}></RealTimeVideo>
+                    <WebcamOutput ref={this.webcamOutputRef} parent={this} width={this.state.video_width} height={this.state.video_height}></WebcamOutput>
+                    <RealTimeVideo parent={this} ref={this.realtimevideoRef} width={this.state.video_width} height={this.state.video_height}></RealTimeVideo>
                 </div>
             );
         }
@@ -189,33 +202,28 @@ class OutputScreenContainer extends React.Component {
 }
 
 class RealTimeVideo extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
-        this.width = props.width;
-        this.height = props.height;
-
         this.canvas_ref = React.createRef();
     }
 
-    componentDidMount(){
-        let canvas = this.canvas_ref.current;
+    componentDidMount() {
+        const canvas = this.canvas_ref.current;
+        canvas.width = this.props.width;
+        canvas.height = this.props.height;
 
-        canvas.width = window.innerWidth * .5;
-        canvas.height = window.innerHeight * .75;
-
-        let ctx = canvas.getContext('2d');
-        let load = new Image();
-        
-
-        load.onload = function(){
-            ctx.drawImage(load, 0, 0, canvas.width, canvas.height);
-        }
-        load.src = "./assets/loading.png";
+        const ctx = canvas.getContext('2d');
+        const load = new Image();
+        load.onload = () => ctx.drawImage(load, 0, 0, canvas.width, canvas.height);
+        load.src = "./assets/loading.jpg";
     }
-    
-    showFrame(imgData){
-        let canvas = this.canvas_ref.current;
-        let ctx = canvas.getContext('2d');
+
+    showFrame(imgData) {
+        const canvas = this.canvas_ref.current;
+        canvas.width = this.props.width;
+        canvas.height = this.props.height;
+        const ctx = canvas.getContext('2d');
+        console.log(`showing frame in rtv: width: ${this.props.width}, height: ${this.props.height}`);
         ctx.drawImage(imgData, 0, 0, canvas.width, canvas.height);
     }
 
@@ -224,7 +232,6 @@ class RealTimeVideo extends React.Component {
             <div>
                 <canvas ref={this.canvas_ref}></canvas>
             </div>
-            
-            )
+        );
     }
 }

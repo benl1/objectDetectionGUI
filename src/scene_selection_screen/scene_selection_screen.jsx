@@ -7,7 +7,7 @@ class SceneSelectionScreen extends React.Component {
         return (
             <div>
                 <SceneSelectionScreenTitle />
-                <SceneSelectionContainer app={this.props.app}/>
+                <SceneSelectionContainer app={this.props.app} />
                 <div className='button' onClick={() => displayImageChoiceScreen(this.props.app)}>Image choice</div>
             </div>
         );
@@ -15,7 +15,7 @@ class SceneSelectionScreen extends React.Component {
 }
 
 class SceneSelectionContainer extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
             showPictureTaker: false,
@@ -29,7 +29,7 @@ class SceneSelectionContainer extends React.Component {
 
         const scene_img_path = img_paths[0];
         console.log(`set the scene image: ${scene_img_path}`);
-        
+
         displayOutputScreen(this.props.app, {
             input: 'scene_image',
             path: scene_img_path
@@ -37,10 +37,10 @@ class SceneSelectionContainer extends React.Component {
     }
 
     handleWebcam() {
-        this.setState({showPictureTaker: true})
+        this.setState({ showPictureTaker: true })
     }
 
-    handleVideo(){
+    handleVideo() {
         displayOutputScreen(this.props.app, {
             input: 'video'
         });
@@ -65,73 +65,52 @@ class SceneSelectionContainer extends React.Component {
 }
 
 class WebcamOutput extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props)
         this.canvas_ref = React.createRef();
-        this.state = {
-            currentImg: null,
-            width: props.width,
-            height: props.height
-        };
-        this.g = true
+        this.is_running = true;
     }
 
     componentDidMount() {
         const canvas = this.canvas_ref.current;
-        let prop = { 
-            video: true, 
-            audio: false
-        };
-        let state = this.state;
-        let self = this;
-        let props = this.props
-        navigator.mediaDevices.getUserMedia(prop)
-                    .then(stream => {
-                        
-                        
-                        const drawFrame = function(){
-                            //test idea
-                            const track = stream.getVideoTracks()[0];
-                            self.track = track;
-                            const track_settings = track.getSettings();
-                            const image_capture = new ImageCapture(track);
+        const media_settings = { video: true, audio: false };
+        const self = this;
+        const props = this.props
+        navigator.mediaDevices.getUserMedia(media_settings)
+            .then(stream => {
+                const drawFrame = function () {
+                    const track = stream.getVideoTracks()[0];
+                    self.track = track;
+                    const image_capture = new ImageCapture(track);
 
-                            image_capture.grabFrame().then((imgData) => {
-                                canvas.width = state.width;
-                                canvas.height = state.height;
-                                const ctx = canvas.getContext('2d');
-                                ctx.drawImage(imgData, 0, 0, state.width, state.height);
+                    image_capture.grabFrame().then((imgData) => {
+                        canvas.width = self.props.width;
+                        canvas.height = self.props.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(imgData, 0, 0, self.props.width, self.props.height);
 
-                                if (!!props.parent && !!props.parent.handleFrame) {
-                                    props.parent.handleFrame(imgData)
-                                   // console.log("processing frame");
-                                }
-                                //ctx.drawImage(imgData, 0, 0);
-                            })
-
-                            const msis = 1000;
-                            const target_frame_rate = 19;
-                            if (self.g) setTimeout(drawFrame, msis / target_frame_rate);
+                        if (!!props.parent && !!props.parent.handleFrame) {
+                            props.parent.handleFrame(imgData)
                         }
-                        
-                        drawFrame();
-                        
-                    }).catch((e) => {console.error(e)})
+                    })
+
+                    const ms_in_s = 1000;
+                    const target_frame_rate = 19;
+                    if (self.is_running) setTimeout(drawFrame, ms_in_s / target_frame_rate);
+                }
+
+                drawFrame();
+            }).catch((e) => { console.error(e) })
     }
 
     componentWillUnmount() {
-        this.g = false;
-        if (this.track){
-            this.track.stop();
-        }
-        
+        this.is_running = false;
+        if (this.track) this.track.stop();
     }
-    
+
     render() {
-        return (
-            <canvas ref={this.canvas_ref}></canvas> 
-        )
-    }   
+        return <canvas ref={this.canvas_ref}></canvas>;
+    }
 }
 
 class PictureTaker extends React.Component {
@@ -139,7 +118,7 @@ class PictureTaker extends React.Component {
         return (
             <div>
                 <WebcamOutput width={500} height={500}></WebcamOutput>
-                <div className='button' onClick={() => {this.takePicture()}}> Grab Frame </div>
+                <div className='button' onClick={() => { this.takePicture() }}> Grab Frame </div>
             </div>
         )
     }
@@ -161,26 +140,26 @@ class PictureTaker extends React.Component {
                 if (video_devices.length == 0) {
                     displayErrorDialog('no webcams found!');
                 } else {
-                    navigator.mediaDevices.getUserMedia({audio:false,video:true})
-                    .then(stream => {
-                        const track = stream.getVideoTracks()[0];
-                        const track_settings = track.getSettings();
-                        const image_capture = new ImageCapture(track);
-                        image_capture.grabFrame().then((imgData) => {
-                            let width = track_settings.width;
-                            let height = track_settings.height;
-                            
-                            displayOutputScreen(this.props.app, {
-                                input: 'webcam', 
-                                id: video_devices[0].deviceId, 
-                                media_options: {video: true, audio: false},
-                                img: imgData,
-                                width: width,
-                                height:height
-                            });
-                        })
-                        
-                    }).catch((e) => {console.error(e)})
+                    navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+                        .then(stream => {
+                            const track = stream.getVideoTracks()[0];
+                            const track_settings = track.getSettings();
+                            const image_capture = new ImageCapture(track);
+                            image_capture.grabFrame().then((imgData) => {
+                                let width = track_settings.width;
+                                let height = track_settings.height;
+
+                                displayOutputScreen(this.props.app, {
+                                    input: 'webcam',
+                                    id: video_devices[0].deviceId,
+                                    media_options: { video: true, audio: false },
+                                    img: imgData,
+                                    width: width,
+                                    height: height
+                                });
+                            })
+
+                        }).catch((e) => { console.error(e) })
                 }
             })
             .catch(err => console.error(err));
@@ -191,4 +170,4 @@ function SceneSelectionScreenTitle(props) {
     return <h3>Select scene imagery source</h3>;
 }
 
-export {SceneSelectionScreen, WebcamOutput};
+export { SceneSelectionScreen, WebcamOutput };
