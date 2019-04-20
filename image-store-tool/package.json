@@ -1,0 +1,16 @@
+{
+	"name": "default-image-tool",
+	"version": "1.0.0",
+	"description": "",
+	"main": "app.js",
+	"scripts": {
+		"start": "electron ."
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"electron": "^4.1.4",
+		"jquery": "^3.4.0"
+	}
+}
