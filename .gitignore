@@ -1,2 +1,4 @@
 node_modules/
 dist/
+image-store-tool/node_modules/
+image-store-tool/images.json

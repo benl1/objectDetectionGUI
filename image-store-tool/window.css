@@ -1,0 +1,32 @@
+img {
+    width: 10em;
+    height: 10em;
+    object-fit: contain;
+    margin: 1em;
+    box-shadow: 0em 0.25em 0.5em gray;
+    border: 0.1em solid black;
+    transition-duration: 0.2s;
+}
+
+img:hover {
+    border: 0.1em solid red;
+    box-shadow: 0em 0em 0em gray;
+}
+
+.button {
+    background: lightgreen;
+    border: 0.1em solid lightgreen;
+    border-radius: 0.1em;
+    box-shadow: 0em 0.25em 0.5em gray;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 1.5em;
+    margin: 0.2em;
+    padding: 0.1em;
+    transition-duration: 0.2s;
+}
+
+.button:hover {
+    background: white;
+    box-shadow: 0em 0em 0em gray;
+}

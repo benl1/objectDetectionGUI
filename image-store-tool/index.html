@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='utf-8'>
+    <title>Image uploader</title>
+
+    <!-- this was taken from the simple electron app setup - 
+        seems the first script allows jquery into the window.js script
+    -->
+    <script>
+        delete module.exports
+    </script>
+    <script src='https://code.jquery.com/jquery-3.4.0.min.js'></script>
+    <script src='window.js'></script>
+    <link rel='stylesheet' type='text/css' href='window.css'>
+</head>
+
+<body>
+    <div id='img_container'></div>
+    <div id='btn_container'>
+        <div class='button' id='upload_btn'>Upload image</div>
+        <div class='button' id='save_btn'>Save</div>
+    </div>
+</body>
+
+</html>

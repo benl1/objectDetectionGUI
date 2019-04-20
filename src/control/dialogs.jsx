@@ -9,7 +9,7 @@ function displayYesNoDialog(message) {
     return dialog.showMessageBox({
         type: 'question',
         message: message,
-        buttons: ['Yes', 'No']
+        buttons: ['Yes', 'No'],
     });
 }
 
@@ -21,15 +21,22 @@ function displayErrorDialog(message) {
     dialog.showMessageBox({
         type: 'error',
         message: message,
-        buttons: ['OK']
+        buttons: ['OK'],
     });
 }
 
 function displayImageUploadDialog() {
     return dialog.showOpenDialog({
         properties: ['openFile'], // users can only upload one file at a time
-        filters: [{ name: 'Images', extensions: ['jpg', 'png'] }]
+        filters: [{ name: 'Images', extensions: ['jpg', 'png'] }],
     });
 }
 
-export { displayYesNoDialog, displayErrorDialog, displayImageUploadDialog };
+function displayImageStoreUploadDialog() {
+    return dialog.showOpenDialog({
+        properties: ['openFile'],
+        filters: [{ name: 'JSON', extensions: ['json'] }],
+    });
+}
+
+export { displayYesNoDialog, displayErrorDialog, displayImageUploadDialog, displayImageStoreUploadDialog };
