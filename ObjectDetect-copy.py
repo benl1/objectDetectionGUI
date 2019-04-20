@@ -109,8 +109,9 @@ def object_detector():
     #num_rows = scene.shape[2]
     #num_cols = scene.shape[3]
 
-    boxes = [[0, 0, 5, 100],
-                [6, 50, 200, 150]]
+    randomInt = np.random.randint(0, 600, (2,4)) 
+    boxes = [[randomInt[0][0],randomInt[0][1] ,randomInt[0][2], randomInt[0][3]],
+                [randomInt[1][0], randomInt[1][1], randomInt[1][2], randomInt[1][3]]]
     scores = [.8, .4]
     
     print("end p")

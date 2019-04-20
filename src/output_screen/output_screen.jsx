@@ -37,10 +37,10 @@ class OutputScreenContainer extends React.Component {
 
     // test resize handler
     resizeHandler() {
-        console.log('window resize');
+        // console.log('window resize');
         const video_width = window.innerWidth * .5;
         const video_height = window.innerHeight * .75;
-        console.log(`new component width: ${video_width}, height: ${video_height}`);
+        // console.log(`new component width: ${video_width}, height: ${video_height}`);
         this.setState({
             video_width: video_width,
             video_height: video_height,
@@ -126,7 +126,7 @@ class OutputScreenContainer extends React.Component {
 
             }
         } catch (err) {
-            console.log(err);
+            // console.log(err);
             displayErrorDialog('failed to connect to server');
             return; // TODO: for now we can just return prematurely
         }
@@ -139,12 +139,14 @@ class OutputScreenContainer extends React.Component {
     handleFrame(imgData) {
         this.inputQueue.push(imgData);
         if (this.firstFrame) {
-            this.processFrame(imgData);
+            this.processFrame();
             this.firstFrame = false;
         }
     }
 
-    processFrame(imgData) {
+    processFrame() {
+        //console.log(this.inputQueue.length)
+        let imgData = this.inputQueue[this.inputQueue.length - 1];
         this.processingFrame = true;
         let rtvComp = this.realtimevideoRef.current;
 
@@ -158,13 +160,40 @@ class OutputScreenContainer extends React.Component {
         let self = this;
         xhttp.onreadystatechange = () => {
             if (xhttp.readyState === XMLHttpRequest.DONE && xhttp.status === 200) {
-                rtvComp.showFrame(imgData);
+                const response = JSON.parse(xhttp.responseText);
+                let tempCanvas = document.createElement("canvas");
+                tempCanvas.width = imgData.width; tempCanvas.height = imgData.height;
+                let tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(imgData, 0, 0, tempCanvas.width, tempCanvas.height);
+
+                const num_boxes = response['boxes'].length;
+                console.log(response['boxes'])
+                tempCtx.strokeStyle = 'red';
+                // draw the bounding boxes and their associated scores to the scene image
+                for (let i = 0; i < num_boxes; i++) {
+                    const [top_x, top_y, bot_x, bot_y] = response['boxes'][i];
+                    const confidence = response['scores'][i];
+                    const height = bot_y - top_y;
+
+                    tempCtx.strokeRect(top_x, top_y, bot_x, bot_y);
+                    tempCtx.strokeText(`${confidence}`, top_x + 5, top_y + height / 2);
+                }
+                
+                rtvComp.showFrame(tempCanvas);
+                // console.log('showed frame');
                 self.inputQueue.pop();
                 self.outputQueue.unshift(imgData);
                 if (self.inputQueue.length > 0) {
-                    self.processFrame(self.inputQueue[self.inputQueue.length - 1]);
+                    self.processFrame();
                 } else {
-                    setTimeout(() => { self.processFrame(self.inputQueue[self.inputQueue.length - 1]) }, 100);
+                    let f = () => {
+                        // console.log('x: ' + self.inputQueue.length)
+                        if (self.inputQueue.length > 0)
+                            self.processFrame();
+                        else 
+                            setTimeout(f, 100);
+                    };
+                    f();
                 }
                 self.processingFrame = false;
             } else if (xhttp.status === 400) {
@@ -223,7 +252,7 @@ class RealTimeVideo extends React.Component {
         canvas.width = this.props.width;
         canvas.height = this.props.height;
         const ctx = canvas.getContext('2d');
-        console.log(`showing frame in rtv: width: ${this.props.width}, height: ${this.props.height}`);
+        // console.log(`showing frame in rtv: width: ${this.props.width}, height: ${this.props.height}`);
         ctx.drawImage(imgData, 0, 0, canvas.width, canvas.height);
     }
 
