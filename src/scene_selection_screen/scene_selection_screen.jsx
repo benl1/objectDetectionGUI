@@ -100,7 +100,7 @@ class WebcamOutput extends React.Component {
                 }
 
                 drawFrame();
-            }).catch((e) => { console.error(e) })
+            }).catch((e) => { displayErrorDialog('Failed to connect to webcam.') })
     }
 
     componentWillUnmount() {

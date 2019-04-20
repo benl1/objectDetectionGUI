@@ -34,8 +34,8 @@ class ImageContainer extends React.Component {
 
         let imgs = this.props.app.getImages();
         if (imgs.length === 0) return;
-
-        imgs = imgs.map((src, idx) => <RImage src={src} key={idx}/>);
+        let self = this
+        imgs = imgs.map((src, idx) => <RImage src={src} removeFunc={(imgsrc) => self.clearImage(imgsrc)} key={idx}/>);
         // use this.state.images instead of setState because the component isn't mounted yet
         this.state.images = imgs;
     }
@@ -45,6 +45,16 @@ class ImageContainer extends React.Component {
         if (file_upload === undefined) return;
 
         this.setState({showCroppingArea: true, last_img_path: file_upload[0]});
+    }
+
+    clearImage(imgSrc) {
+        let state = this.state;
+        state.images = state.images.filter((obj) => {
+            return obj.props.src !== imgSrc;
+        });
+
+        this.setState(state);
+        this.props.app.removeImage(imgSrc);
     }
 
     clearAllImages() {
@@ -162,7 +172,7 @@ class CroppingArea extends React.Component {
         const key = junk_parent.props.app.addImage(this.props.img_path);
         const imgs = junk_parent.state.images;
 
-        imgs.push(<RImage key={key} src={this.props.img_path} />);
+        imgs.push(this.createRImage(this.props.img_path, key));
         junk_parent.setState({ images: imgs, showCroppingArea: false });
     }
 
@@ -194,9 +204,13 @@ class CroppingArea extends React.Component {
             const key = junk_parent.props.app.addImage(dataPath);
             const imgs = junk_parent.state.images;
     
-            imgs.push(<RImage key={key} src={dataPath} />);
+            imgs.push(this.createRImage(dataPath, key));
             junk_parent.setState({ images: imgs, showCroppingArea: false });
         }
+    }
+
+    createRImage(src, key){
+        return <RImage key={key} src={src} removeFunc={(imgsrc) => this.props.death.clearImage(imgsrc)}/>
     }
 
     render() {
@@ -212,9 +226,11 @@ class CroppingArea extends React.Component {
 }
 
 function RImage(props) {
+
     return (
         <div className='imageWrapper'>
             <img className='image' src={props.src} />
+            <div className='button imageDelete' onClick={ (e) => props.removeFunc(props.src)}></div>
         </div>
     );
 }

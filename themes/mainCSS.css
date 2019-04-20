@@ -28,6 +28,8 @@ div.imageDelete {
 	position: absolute;
 	top: 10%;
 	right: 10%;
+	width: 10%;
+	height: 10%;
 	color: red;
 	cursor: pointer;
 }

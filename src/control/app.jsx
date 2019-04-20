@@ -9,6 +9,12 @@ export default class App {
         return this.image_key++;
     }
 
+    removeImage(img_path) {
+        this.images = this.images.filter((obj) => {
+            return obj !== img_path;
+        })
+    }
+
     removeAllImages() {
         this.images = [];
         this.image_key = 0;

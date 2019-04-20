@@ -4,7 +4,7 @@ import torch
 import PIL
 import torchvision.models as models
 from torchvision import transforms as T
-import numpy as np
+import random
 import datetime
 
 app = Flask(__name__)
@@ -109,8 +109,7 @@ def object_detector():
     #num_rows = scene.shape[2]
     #num_cols = scene.shape[3]
 
-    boxes = [[0, 0, 5, 100],
-                [6, 50, 200, 150]]
+    boxes = [[0, 0, 200, 200], [100, 100, 300, 300]]
     scores = [.8, .4]
     
     print("end p")

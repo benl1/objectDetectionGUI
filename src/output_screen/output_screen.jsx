@@ -65,8 +65,12 @@ class OutputScreenContainer extends React.Component {
         xhttp.open('POST', 'http://127.0.0.1:5000/detect', true);
         xhttp.setRequestHeader('Content-Type', 'application/json');
         xhttp.onreadystatechange = () => {
+            console.log('got response from server:');
+            console.log(xhttp);
             if (xhttp.readyState === XMLHttpRequest.DONE && xhttp.status === 200) {
                 const response = JSON.parse(xhttp.responseText);
+                console.log(response);
+                console.log('fuck me');
                 const cv = this.canvas_ref.current;
                 const num_boxes = response['boxes'].length;
 
@@ -81,6 +85,8 @@ class OutputScreenContainer extends React.Component {
                     const [top_x, top_y, bot_x, bot_y] = response['boxes'][i];
                     const confidence = response['scores'][i];
                     const height = bot_y - top_y;
+                    console.log('box');
+                    console.log(top_x + ", " + top_y + ", " + bot_x + ", " + bot_y);
 
                     ctxOut.strokeRect(top_x, top_y, bot_x, bot_y);
                     ctxOut.strokeText(`${confidence}`, top_x + 5, top_y + height / 2);
@@ -97,10 +103,9 @@ class OutputScreenContainer extends React.Component {
                 const tmp_img = new Image();
                 tmp_img.onload = function () {
                     const canvas = self.canvas_ref.current;
-                    // canvas.width = window.innerWidth * .5;
-                    // canvas.height = window.innerHeight * .75;
-                    canvas.width = this.state.video_width;
-                    canvas.heigth = this.state.video_height;
+                     
+                    canvas.width = self.state.video_width;
+                    canvas.heigth = self.state.video_height;
 
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(tmp_img, 0, 0, canvas.width, canvas.height);
@@ -139,12 +144,14 @@ class OutputScreenContainer extends React.Component {
     handleFrame(imgData) {
         this.inputQueue.push(imgData);
         if (this.firstFrame) {
-            this.processFrame(imgData);
+            this.processFrame();
             this.firstFrame = false;
         }
     }
 
-    processFrame(imgData) {
+    processFrame() {
+        //console.log(this.inputQueue.length)
+        let imgData = this.inputQueue[this.inputQueue.length - 1];
         this.processingFrame = true;
         let rtvComp = this.realtimevideoRef.current;
 
@@ -158,13 +165,40 @@ class OutputScreenContainer extends React.Component {
         let self = this;
         xhttp.onreadystatechange = () => {
             if (xhttp.readyState === XMLHttpRequest.DONE && xhttp.status === 200) {
-                rtvComp.showFrame(imgData);
+                const response = JSON.parse(xhttp.responseText);
+                let tempCanvas = document.createElement("canvas");
+                tempCanvas.width = imgData.width; tempCanvas.height = imgData.height;
+                let tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(imgData, 0, 0, tempCanvas.width, tempCanvas.height);
+
+                const num_boxes = response['boxes'].length;
+                console.log(response['boxes'])
+                tempCtx.strokeStyle = 'red';
+                // draw the bounding boxes and their associated scores to the scene image
+                for (let i = 0; i < num_boxes; i++) {
+                    const [top_x, top_y, bot_x, bot_y] = response['boxes'][i];
+                    const confidence = response['scores'][i];
+                    const height = bot_y - top_y;
+
+                    tempCtx.strokeRect(top_x, top_y, bot_x, bot_y);
+                    tempCtx.strokeText(`${confidence}`, top_x + 5, top_y + height / 2);
+                }
+                
+                rtvComp.showFrame(tempCanvas);
+                // console.log('showed frame');
                 self.inputQueue.pop();
                 self.outputQueue.unshift(imgData);
                 if (self.inputQueue.length > 0) {
-                    self.processFrame(self.inputQueue[self.inputQueue.length - 1]);
+                    self.processFrame();
                 } else {
-                    setTimeout(() => { self.processFrame(self.inputQueue[self.inputQueue.length - 1]) }, 100);
+                    let f = () => {
+                        // console.log('x: ' + self.inputQueue.length)
+                        if (self.inputQueue.length > 0)
+                            self.processFrame();
+                        else 
+                            setTimeout(f, 100);
+                    };
+                    f();
                 }
                 self.processingFrame = false;
             } else if (xhttp.status === 400) {
@@ -180,6 +214,31 @@ class OutputScreenContainer extends React.Component {
         const scene = produceRGBArray(tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height));
         xhttp.send(JSON.stringify({ scene: scene, targets: target_images }));
         //console.log(rtvComp);
+    }
+
+    componentDidUpdate() {
+        if (this.props.input_options.input === 'scene_image' || this.props.input_options.input === 'webcam') {
+            const cv = this.canvas_ref.current;
+            const cout = this.output_canvas_ref.current;
+            const tmp_cv = document.createElement('canvas');
+            const tmp_cout = document.createElement('canvas');
+
+            tmp_cv.width = cv.width;
+            tmp_cv.height = cv.height;
+            tmp_cout.width = cout.width;
+            tmp_cout.height = cout.height;
+
+            tmp_cv.getContext('2d').drawImage(cv, 0, 0);
+            tmp_cout.getContext('2d').drawImage(cout, 0, 0);
+
+            cv.width = this.state.video_width;
+            cv.height = this.state.video_height;
+            cout.width = this.state.video_width;
+            cout.height = this.state.video_height;
+
+            cv.getContext('2d').drawImage(tmp_cv, 0, 0, cv.width, cv.height);
+            cout.getContext('2d').drawImage(tmp_cout, 0, 0, cout.width, cout.height);
+        }
     }
 
     render() {
