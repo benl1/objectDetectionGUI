@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ImageChoiceScreen from './image_choice_screen/image_choice_screen';
-import {SceneSelectionScreen} from './scene_selection_screen/scene_selection_screen';
+import { SceneSelectionScreen } from './scene_selection_screen/scene_selection_screen';
 import OutputScreen from './output_screen/output_screen';
 import App from './control/app';
+import VideoOutputScreen from './output_screen/video_output_screen';
 
 window.onload = () => {
     initialize();
@@ -34,4 +35,11 @@ function displayOutputScreen(app, options) {
     );
 }
 
-export { displayImageChoiceScreen, displaySceneSelectionScreen, displayOutputScreen };
+function displayVideoOutputScreen(app) {
+    ReactDOM.render(
+        <VideoOutputScreen app={app}></VideoOutputScreen>,
+        document.getElementById('root')
+    );
+}
+
+export { displayImageChoiceScreen, displaySceneSelectionScreen, displayOutputScreen, displayVideoOutputScreen };

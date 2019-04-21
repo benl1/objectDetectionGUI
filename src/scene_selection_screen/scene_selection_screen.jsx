@@ -1,4 +1,4 @@
-import { displayImageChoiceScreen, displayOutputScreen } from '../entrypoint';
+import { displayImageChoiceScreen, displayOutputScreen, displayVideoOutputScreen } from '../entrypoint';
 import { displayYesNoDialog, displayImageUploadDialog, displayErrorDialog } from '../control/dialogs';
 import React from 'react';
 
@@ -41,9 +41,7 @@ class SceneSelectionContainer extends React.Component {
     }
 
     handleVideo() {
-        displayOutputScreen(this.props.app, {
-            input: 'video'
-        });
+        displayVideoOutputScreen(this.props.app);
     }
 
     render() {
@@ -95,7 +93,7 @@ class WebcamOutput extends React.Component {
                     })
 
                     const ms_in_s = 1000;
-                    const target_frame_rate = 19;
+                    const target_frame_rate = 10;
                     if (self.is_running) setTimeout(drawFrame, ms_in_s / target_frame_rate);
                 }
 
