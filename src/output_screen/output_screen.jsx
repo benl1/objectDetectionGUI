@@ -1,7 +1,7 @@
 import { displayImageChoiceScreen, displaySceneSelectionScreen } from '../entrypoint';
 import { getImageDataFromURL, produceRGBArray } from '../control/imageops';
 import { displayErrorDialog } from '../control/dialogs';
-import { drawBoundingBoxes, resizeHandler } from './common';
+import { drawBoundingBoxes, resizeHandler, BoundingBoxSettings } from './common';
 import React from 'react';
 
 export default function OutputScreen(props) {
@@ -28,8 +28,12 @@ class OutputScreenContainer extends React.Component {
 
     componentDidMount() {
         // call the resize handler and register it with the window.
-        resizeHandler(this);
-        window.addEventListener('resize', () => resizeHandler(this));
+        const self = this;
+        resizeHandler(self);
+        window.addEventListener('resize', function resize() {
+            resizeHandler(self);
+            console.log(self.state);
+        });
 
         // convert all the target images to RGB arrays which are ready to be sent to the
         // python server
@@ -80,7 +84,7 @@ class OutputScreenContainer extends React.Component {
     }
 
     componentWillUnmount() {
-        window.removeEventListener('resize', () => resizeHandler());
+        window.removeEventListener('resize', resize);
     }
 
     drawAndGetRGBArray(img) {
@@ -99,6 +103,7 @@ class OutputScreenContainer extends React.Component {
             <div className='videoOutput'>
                 <canvas className='dontGrow' ref={this.canvas_ref}></canvas>
                 <canvas className='dontGrow' ref={this.output_canvas_ref}></canvas>
+                <BoundingBoxSettings></BoundingBoxSettings>
             </div>
         );
     }

@@ -1,3 +1,5 @@
+import React from 'react';
+
 function drawBoundingBoxes(context, json_response) {
     const num_boxes = json_response['boxes'].length;
     context.strokeStyle = 'red';
@@ -14,14 +16,23 @@ function drawBoundingBoxes(context, json_response) {
 }
 
 function resizeHandler(self) {
-    console.log('got a resize request');
+    console.log('in resize bullshit listener!');
     const output_width = window.innerWidth * .5;
     const output_height = window.innerHeight * .75;
-    console.log(self);
     self.setState({
         output_width: output_width,
         output_height: output_height,
     });
 }
 
-export { drawBoundingBoxes, resizeHandler };
+class BoundingBoxSettings extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return <div>Here is where bounding box settings will go.</div>;
+    }
+}
+
+export { drawBoundingBoxes, resizeHandler, BoundingBoxSettings };

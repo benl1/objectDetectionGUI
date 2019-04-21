@@ -1,7 +1,7 @@
 import { displayImageChoiceScreen, displaySceneSelectionScreen } from '../entrypoint';
 import { WebcamOutput } from '../scene_selection_screen/scene_selection_screen';
 import { getImageDataFromURL, produceRGBArray } from '../control/imageops';
-import { drawBoundingBoxes, resizeHandler } from './common';
+import { drawBoundingBoxes, resizeHandler, BoundingBoxSettings } from './common';
 import React from 'react';
 
 export default function VideoOutputScreen(props) {
@@ -30,16 +30,22 @@ class VideoOutputContainer extends React.Component {
     }
 
     componentDidMount() {
-        resizeHandler(this);
-        window.addEventListener('resize', () => resizeHandler(this));
+        // call the resize handler and register it with the window.
+        const self = this;
+        resizeHandler(self);
+        window.addEventListener('resize', function resize() {
+            resizeHandler(self);
+        });
 
+        // calculate the RGB arrays for the target images once so we don't have to
+        // every frame of video that we go through
         const target_images = [];
         this.props.app.images.forEach(img_path => target_images.push(produceRGBArray(getImageDataFromURL(img_path))));
         this.target_images = target_images;
     }
 
     componentWillUnmount() {
-        window.removeEventListener('resize', () => resizeHandler());
+        window.removeEventListener('resize', resize);
     }
 
     handleFrame(imgData) {
@@ -98,6 +104,7 @@ class VideoOutputContainer extends React.Component {
             <div className='videoOutput'>
                 <WebcamOutput ref={this.webcam_output_ref} parent={this} width={this.state.output_width} height={this.state.output_height}></WebcamOutput>
                 <RealTimeVideo parent={this} ref={this.realtime_video_ref} width={this.state.output_width} height={this.state.output_height}></RealTimeVideo>
+                <BoundingBoxSettings></BoundingBoxSettings>
             </div>
         );
     }
@@ -125,7 +132,6 @@ class RealTimeVideo extends React.Component {
         canvas.width = this.props.width;
         canvas.height = this.props.height;
         const ctx = canvas.getContext('2d');
-        // console.log(`showing frame in rtv: width: ${this.props.width}, height: ${this.props.height}`);
         ctx.drawImage(imgData, 0, 0, canvas.width, canvas.height);
     }
 
