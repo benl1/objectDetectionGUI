@@ -5,7 +5,7 @@ import React from 'react';
 class SceneSelectionScreen extends React.Component {
     render() {
         return (
-            <div>
+            <div className='flexColumn'>
                 <SceneSelectionScreenTitle />
                 <SceneSelectionContainer app={this.props.app} />
                 <div className='button' onClick={() => displayImageChoiceScreen(this.props.app)}>Image choice</div>
@@ -46,7 +46,7 @@ class SceneSelectionContainer extends React.Component {
 
     render() {
         return (
-            <div>
+            <div className='flexColumn'>
                 <div className='button' onClick={() => this.handleSceneImageUpload()}>
                     Upload scene image
                 </div>
@@ -67,6 +67,8 @@ class WebcamOutput extends React.Component {
         super(props)
         this.canvas_ref = React.createRef();
         this.is_running = true;
+        this.paused = false;
+        this.showPausedButton = props.showPausedButton || false;
     }
 
     componentDidMount() {
@@ -87,18 +89,18 @@ class WebcamOutput extends React.Component {
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(imgData, 0, 0, self.props.width, self.props.height);
 
-                        if (!!props.parent && !!props.parent.handleFrame) {
+                        if (!!props.parent && !!props.parent.handleFrame && !self.paused) {
                             props.parent.handleFrame(imgData)
                         }
                     })
 
                     const ms_in_s = 1000;
-                    const target_frame_rate = 10;
+                    const target_frame_rate = 19;
                     if (self.is_running) setTimeout(drawFrame, ms_in_s / target_frame_rate);
-                }
+                };
 
                 drawFrame();
-            }).catch((e) => { displayErrorDialog('Failed to connect to webcam.') })
+            }).catch(() => { displayErrorDialog('Failed to connect to webcam.') })
     }
 
     componentWillUnmount() {
@@ -106,15 +108,24 @@ class WebcamOutput extends React.Component {
         if (this.track) this.track.stop();
     }
 
+    pause(){
+        this.paused = !this.paused;
+        return this.paused;
+    }
+
     render() {
-        return <canvas ref={this.canvas_ref}></canvas>;
+        return (
+            <div className='flexColumn'>
+                <canvas ref={this.canvas_ref} />
+            </div>
+        );
     }
 }
 
 class PictureTaker extends React.Component {
     render() {
         return (
-            <div>
+            <div className='flexColumn'>
                 <WebcamOutput width={500} height={500}></WebcamOutput>
                 <div className='button' onClick={() => { this.takePicture() }}> Grab Frame </div>
             </div>

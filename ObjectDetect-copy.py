@@ -108,9 +108,12 @@ def object_detector():
     
     #num_rows = scene.shape[2]
     #num_cols = scene.shape[3]
+    boxes = []
+    scores = []
 
-    boxes = [[0, 0, 200, 200], [100, 100, 300, 300]]
-    scores = [.8, .4]
+    for i in range(10):
+        boxes.append(random.choices([i for i in range(300)], k=4))
+        scores.append(random.random())
     
     print("end p")
     return jsonify({'boxes': boxes, 'scores': scores})

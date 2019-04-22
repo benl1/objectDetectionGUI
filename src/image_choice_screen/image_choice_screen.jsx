@@ -14,8 +14,8 @@ export default class ImageChoiceScreen extends React.Component {
 
     render() {
         return (
-            <div>
-                <ImageChoiceScreenTitle />
+            <div className='flexColumn'>
+                <h3>Select search objects</h3>
                 <ImageContainer app={this.props.app} />
                 <div className='button' onClick={() => this.handleSceneSelectionClick()}>Scene Selection</div>
             </div>
@@ -68,7 +68,7 @@ class ImageContainer extends React.Component {
 
     render() {
         return (
-            <div>
+            <div className='flexColumn'>
                 <UploadImageButton click={() => this.uploadImage()} />
                 <ClearAllImagesButton click={() => this.clearAllImages()} />
                 <div className='imageContainer'>{this.state.images}</div>
@@ -215,9 +215,9 @@ class CroppingArea extends React.Component {
 
     render() {
         return (
-            <div>
+            <div className='flexColumn'>
                 <h3>Click and drag to crop image:</h3>
-                <canvas ref={this.canvas_ref} onClick={(event) => this.handleAreaSelection(event)}></canvas>
+                <canvas className='croppingCanvas' ref={this.canvas_ref} onClick={(event) => this.handleAreaSelection(event)}></canvas>
                 <div className='button' onClick={() => this.handleWholeImage()}>Take whole image</div>
                 <div className='button' onClick={() => this.handleCropCapture()}>Take cropped image</div>
             </div>
@@ -226,11 +226,10 @@ class CroppingArea extends React.Component {
 }
 
 function RImage(props) {
-
     return (
         <div className='imageWrapper'>
             <img className='image' src={props.src} />
-            <div className='button imageDelete' onClick={ (e) => props.removeFunc(props.src)}></div>
+            <img className='imageDelete' src="assets/deleteImageSymbol.jpg" onClick={ (e) => props.removeFunc(props.src)}/>
         </div>
     );
 }
@@ -245,8 +244,4 @@ function ClearAllImagesButton(props) {
     return <div className='button' onClick={() => props.click()}>
         Clear all images
     </div>;
-}
-
-function ImageChoiceScreenTitle(props) {
-    return <h3>Select search objects</h3>;
 }

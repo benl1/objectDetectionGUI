@@ -20,7 +20,6 @@ function createWindow() {
     mainWindow = null
   })
 
-  mainWindow.webContents.openDevTools();
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 }
 

@@ -6,7 +6,7 @@ import React from 'react';
 
 export default function OutputScreen(props) {
     return (
-        <div>
+        <div className='flexColumn'>
             <OutputScreenContainer app={props.app} input_options={props.input_options} />
             <div className='button' onClick={() => displayImageChoiceScreen(props.app)}>Image choice</div>
             <div className='button' onClick={() => displaySceneSelectionScreen(props.app)}>Scene selection</div>
@@ -28,12 +28,9 @@ class OutputScreenContainer extends React.Component {
 
     componentDidMount() {
         // call the resize handler and register it with the window.
-        const self = this;
-        resizeHandler(self);
-        window.addEventListener('resize', function resize() {
-            resizeHandler(self);
-            console.log(self.state);
-        });
+        this.resizeHandler = resizeHandler.bind(this);
+        this.resizeHandler();
+        window.addEventListener('resize', this.resizeHandler);
 
         // convert all the target images to RGB arrays which are ready to be sent to the
         // python server
@@ -84,7 +81,7 @@ class OutputScreenContainer extends React.Component {
     }
 
     componentWillUnmount() {
-        window.removeEventListener('resize', resize);
+        window.removeEventListener('resize', this.resizeHandler);
     }
 
     drawAndGetRGBArray(img) {
@@ -98,11 +95,34 @@ class OutputScreenContainer extends React.Component {
         return input_context;
     }
 
+    componentDidUpdate() {
+        let tmp_canvas = document.createElement('canvas');
+        tmp_canvas.width = this.state.output_width;
+        tmp_canvas.height = this.state.output_height;
+        let tmp_ctx = tmp_canvas.getContext('2d');
+        const input_canvas = this.canvas_ref.current;
+        
+        tmp_ctx.drawImage(input_canvas, 0, 0, tmp_canvas.width, tmp_canvas.height);
+        input_canvas.width = this.state.output_width;
+        input_canvas.height = this.state.output_height;
+        const input_context = input_canvas.getContext('2d');
+        input_context.drawImage(tmp_canvas, 0, 0, tmp_canvas.width, tmp_canvas.height);
+
+        const output_canvas = this.output_canvas_ref.current;
+        tmp_ctx.drawImage(output_canvas, 0, 0, tmp_canvas.width, tmp_canvas.height);
+        output_canvas.width = this.state.output_width;
+        output_canvas.height = this.state.output_height;
+        const output_context = output_canvas.getContext('2d');
+        output_context.drawImage(tmp_canvas, 0, 0, tmp_canvas.width, tmp_canvas.height);
+    }
+
     render() {
         return (
-            <div className='videoOutput'>
-                <canvas className='dontGrow' ref={this.canvas_ref}></canvas>
-                <canvas className='dontGrow' ref={this.output_canvas_ref}></canvas>
+            <div className='flexColumn'>
+                <div className='videoOutput'>
+                    <canvas className='dontGrow' ref={this.canvas_ref}></canvas>
+                    <canvas className='dontGrow' ref={this.output_canvas_ref}></canvas>
+                </div>
                 <BoundingBoxSettings></BoundingBoxSettings>
             </div>
         );
