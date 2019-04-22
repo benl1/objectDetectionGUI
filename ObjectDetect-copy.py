@@ -112,7 +112,10 @@ def object_detector():
     scores = []
 
     for i in range(10):
-        boxes.append(random.choices([i for i in range(300)], k=4))
+        temp = []
+        for i in range(4):
+            temp.append(random.choice([i for i in range(300)]))
+        boxes.append(temp)
         scores.append(random.random())
     
     print("end p")
