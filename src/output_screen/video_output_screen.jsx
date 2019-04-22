@@ -23,7 +23,6 @@ class VideoOutputContainer extends React.Component {
         this.box_settings_ref = React.createRef();
         this.firstFrame = true;
         this.inputQueue = [];
-        this.outputQueue = [];
 
         this.state = {
             output_width: 0,
@@ -33,7 +32,7 @@ class VideoOutputContainer extends React.Component {
 
     componentDidMount() {
         // call the resize handler and register it with the window.
-        
+
         this.resizeHandler = resizeHandler.bind(this);
         this.resizeHandler();
         window.addEventListener('resize', this.resizeHandler);
@@ -84,8 +83,6 @@ class VideoOutputContainer extends React.Component {
                 drawBoundingBoxes(temp_ctx, response, box_settings);
                 rtvComp.showFrame(temp_canvas);
 
-                //self.outputQueue.unshift(imgData);
-
                 const callback = () => {
                     if (self.inputQueue.length > 0) {
                         self.processFrame();
@@ -95,9 +92,8 @@ class VideoOutputContainer extends React.Component {
                 };
 
                 callback();
-            } else {
-                if (xhttp.status !== 200)
-                    displayErrorDialog('Server error');
+            } else if (xhttp.status !== 200) {
+                displayErrorDialog('Server error');
             }
         };
 
@@ -108,16 +104,16 @@ class VideoOutputContainer extends React.Component {
     render() {
         const self = this;
         return (
-        <div className='flexColumn'>
-            <div className='videoOutput'>
-                <WebcamOutput showPausedButton={true} ref={this.webcam_output_ref} parent={this} width={this.state.output_width} height={this.state.output_height}></WebcamOutput>
-                <RealTimeVideo parent={this} ref={this.realtime_video_ref} width={this.state.output_width} height={this.state.output_height}></RealTimeVideo>
+            <div className='flexColumn'>
+                <div className='videoOutput'>
+                    <WebcamOutput showPausedButton={true} ref={this.webcam_output_ref} parent={this} width={this.state.output_width} height={this.state.output_height}></WebcamOutput>
+                    <RealTimeVideo parent={this} ref={this.realtime_video_ref} width={this.state.output_width} height={this.state.output_height}></RealTimeVideo>
+                </div>
+                <div className='button' onClick={(e) => {
+                    e.target.innerHTML = self.webcam_output_ref.current.pause() ? "Resume video" : "Pause video";
+                }}>Pause video</div>
+                <BoundingBoxSettings ref={this.box_settings_ref}></BoundingBoxSettings>
             </div>
-            <div className='button' onClick={(e) =>{
-                e.target.innerHTML = self.webcam_output_ref.current.pause() ? "Resume video" : "Pause video";
-            }}>Pause video</div>
-            <BoundingBoxSettings ref={this.box_settings_ref}></BoundingBoxSettings>
-        </div>
         );
     }
 }

@@ -54,11 +54,14 @@ class OutputScreenContainer extends React.Component {
                 output_canvas.height = input_canvas.height;
                 output_context.drawImage(input_canvas, 0, 0);
 
-                drawBoundingBoxes(output_context, response);
-            } else if (xhttp.status === 400) {
-                displayErrorDialog('server responded with 400.');
-            } else {
-                // displayErrorDialog(`status: ${xhttp.status}, text: ${xhttp.responseText}`);
+                // for now, we can just pass in an object that allows all boxes to be shown on the image:
+                const box_settings = {
+                    box_count: 10,
+                    threshold: 0,
+                }
+                drawBoundingBoxes(output_context, response, box_settings);
+            } else if (xhttp.status !== 200) {
+                displayErrorDialog('Server error');
             }
         };
 
@@ -123,7 +126,6 @@ class OutputScreenContainer extends React.Component {
                     <canvas className='dontGrow' ref={this.canvas_ref}></canvas>
                     <canvas className='dontGrow' ref={this.output_canvas_ref}></canvas>
                 </div>
-                <BoundingBoxSettings></BoundingBoxSettings>
             </div>
         );
     }
