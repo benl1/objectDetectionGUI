@@ -39,7 +39,9 @@ class ImageContainer extends React.Component {
         // use this.state.images instead of setState because the component isn't mounted yet
         this.state.images = imgs;
     }
-
+    testFunction() {
+        console.log("success!")
+    }
     uploadImage() {
         const file_upload = displayImageUploadDialog();
         if (file_upload === undefined) return;
@@ -245,3 +247,5 @@ function ClearAllImagesButton(props) {
         Clear all images
     </div>;
 }
+
+

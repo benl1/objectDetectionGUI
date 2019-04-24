@@ -5,6 +5,9 @@ import { getImageDataFromURL, produceRGBArray } from '../control/imageops';
 import { displayErrorDialog } from '../control/dialogs';
 import React from 'react';
 
+
+const fs = require('fs');
+
 export default function VideoOutputScreen(props) {
     return (
         <div className='flexColumn'>
@@ -23,6 +26,10 @@ class VideoOutputContainer extends React.Component {
         this.box_settings_ref = React.createRef();
         this.firstFrame = true;
         this.inputQueue = [];
+        this.outputQueue = [];
+        this.recorder = undefined;
+
+        this.chunks = [];
 
         this.state = {
             output_width: 0,
@@ -42,8 +49,18 @@ class VideoOutputContainer extends React.Component {
         const target_images = [];
         this.props.app.images.forEach(img_path => target_images.push(produceRGBArray(getImageDataFromURL(img_path))));
         this.target_images = target_images;
+
+        this.stream = this.realtime_video_ref.current.getCanvas().captureStream(19)
+        var options = {mimeType : 'video/webm;codecs=vp9'}
+        this.recorder = new MediaRecorder(this.stream, options)
+        this.recorder.ondataavailable = this.handleData
     }
 
+    handleData (e) {
+        if (e.data.size > 0){
+            this.chunks.push(e.data)
+        }
+    }
     componentWillUnmount() {
         window.removeEventListener('resize', this.resizeHandler);
     }
@@ -53,6 +70,10 @@ class VideoOutputContainer extends React.Component {
         if (this.firstFrame) {
             this.firstFrame = false;
             this.processFrame();
+            console.log("Started recorder")
+            this.recorder.start()
+            console.log(this.recorder)
+
         }
     }
 
@@ -69,6 +90,10 @@ class VideoOutputContainer extends React.Component {
         const temp_ctx = temp_canvas.getContext('2d');
         temp_ctx.drawImage(imgData, 0, 0, temp_canvas.width, temp_canvas.height);
 
+        // Start the recording if the first frame of the output has been created
+
+        
+
         // prepare the rest call
         const xhttp = new XMLHttpRequest();
         xhttp.open('POST', 'http://127.0.0.1:5000/detect', true);
@@ -81,6 +106,7 @@ class VideoOutputContainer extends React.Component {
                     threshold: this.box_settings_ref.current.getThreshold(),
                 }
                 drawBoundingBoxes(temp_ctx, response, box_settings);
+                this.outputQueue.push(temp_canvas.toDataURL("image/png"))
                 rtvComp.showFrame(temp_canvas);
 
                 const callback = () => {
@@ -113,6 +139,18 @@ class VideoOutputContainer extends React.Component {
                     e.target.innerHTML = self.webcam_output_ref.current.pause() ? "Resume video" : "Pause video";
                 }}>Pause video</div>
                 <BoundingBoxSettings ref={this.box_settings_ref}></BoundingBoxSettings>
+                <div id = "download_video" className="button" onClick = { () => {
+                        self.recorder.stop()
+                        var blob = new Blob(self.chunks, {type: "video/webm"})  
+                        var urlObj = URL.createObjectURL(blob)
+                        video_button = document.getElementById("download_video")
+                        video_button.href = urlObj
+                        video_button.download = "test.webm"
+                        video_button.click()
+                        window.URL.revokeObjectURL(urlObj)
+
+                    }
+                }></div>
             </div>
         );
     }
@@ -123,7 +161,9 @@ class RealTimeVideo extends React.Component {
         super(props);
         this.canvas_ref = React.createRef();
     }
-
+    getCanvas() {
+        return this.canvas_ref.current;
+    }
     componentDidMount() {
         const canvas = this.canvas_ref.current;
         canvas.width = this.props.width;
