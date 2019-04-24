@@ -52,11 +52,13 @@ class VideoOutputContainer extends React.Component {
 
         this.stream = this.realtime_video_ref.current.getCanvas().captureStream(19)
         var options = {mimeType : 'video/webm;codecs=vp9'}
+        
         this.recorder = new MediaRecorder(this.stream, options)
-        this.recorder.ondataavailable = this.handleData
+        this.recorder.ondataavailable = this.handleData.bind(this);
     }
 
     handleData (e) {
+        console.log(e.data.size)
         if (e.data.size > 0){
             this.chunks.push(e.data)
         }
@@ -108,7 +110,10 @@ class VideoOutputContainer extends React.Component {
                 drawBoundingBoxes(temp_ctx, response, box_settings);
                 this.outputQueue.push(temp_canvas.toDataURL("image/png"))
                 rtvComp.showFrame(temp_canvas);
-
+                if(self.recorder.state === 'recording'){
+                    self.recorder.requestData();
+                }
+                
                 const callback = () => {
                     if (self.inputQueue.length > 0) {
                         self.processFrame();
@@ -140,14 +145,26 @@ class VideoOutputContainer extends React.Component {
                 }}>Pause video</div>
                 <BoundingBoxSettings ref={this.box_settings_ref}></BoundingBoxSettings>
                 <div id = "download_video" className="button" onClick = { () => {
-                        self.recorder.stop()
-                        var blob = new Blob(self.chunks, {type: "video/webm"})  
-                        var urlObj = URL.createObjectURL(blob)
-                        video_button = document.getElementById("download_video")
-                        video_button.href = urlObj
-                        video_button.download = "test.webm"
-                        video_button.click()
-                        window.URL.revokeObjectURL(urlObj)
+                    // self.recorder.pause()
+                    self.recorder.stop()
+                    var blob = new Blob(self.chunks, {type: "video/webm"})  
+                    var urlObj = URL.createObjectURL(blob)
+                    var a = document.createElement('a');
+                    document.body.appendChild(a);
+                    a.style = 'display: none';
+                    a.href = urlObj;
+                    a.download = 'test.webm';
+                    a.click();
+                    a.click();
+                    self.chunks.length = 0
+                    self.stream = self.realtime_video_ref.current.getCanvas().captureStream(19)
+                    var options = {mimeType : 'video/webm;codecs=vp9'}
+                    
+                    self.recorder = new MediaRecorder(self.stream, options)
+                    self.recorder.ondataavailable = self.handleData.bind(self);
+                    self.recorder.start()
+                    // self.recorder.resume()
+                    window.URL.revokeObjectURL(urlObj)
 
                     }
                 }></div>
