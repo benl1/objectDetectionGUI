@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "gulp transpile && electron .",
-    "test": "mocha test"
+    "test": "mocha test",
+    "jest": "jest"
   },
   "repository": {
     "type": "git",
