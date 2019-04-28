@@ -359,4 +359,4 @@ function ClearAllImagesButton(props) {
     </div>;
 }
 
-export{ ImageContainer, CroppingArea, UploadImageButton }
+export{ ImageContainer, CroppingArea }
