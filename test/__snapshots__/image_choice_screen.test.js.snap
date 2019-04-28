@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Image Choice screen test that image choice renders 1`] = `
+exports[`Image Choice screen test that image choice renders correctly 1`] = `
 <div
   className="flexColumn"
 >
@@ -36,4 +36,51 @@ exports[`Image Choice screen test that image choice renders 1`] = `
 </div>
 `;
 
-exports[`Image Choice screen test that image choice renders cropping area when the state is changed 1`] = `ShallowWrapper {}`;
+exports[`Image Choice screen test that imagecontainer renders correctly 1`] = `
+<div
+  className="flexColumn"
+>
+  <div
+    className="button"
+    id="upload_image_button"
+    onClick={[Function]}
+  >
+    Upload an image
+  </div>
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+    Clear all images
+  </div>
+  <div
+    className="imageContainer"
+  />
+</div>
+`;
+
+exports[`Image Choice screen tests that cropping area renders correctly 1`] = `
+<div
+  className="flexColumn"
+>
+  <h3>
+    Click and drag to crop image:
+  </h3>
+  <canvas
+    className="croppingCanvas"
+    onClick={[Function]}
+  />
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+    Take whole image
+  </div>
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+    Take cropped image
+  </div>
+</div>
+`;
