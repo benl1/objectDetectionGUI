@@ -1,4 +1,5 @@
 import React from 'react';
+import {shallow} from 'enzyme';
 import { displayYesNoDialog, displayImageUploadDialog, displayErrorDialog } from '../control/dialogs';
 import { displaySceneSelectionScreen } from '../entrypoint';
 
@@ -248,4 +249,4 @@ function ClearAllImagesButton(props) {
     </div>;
 }
 
-
+export{ ImageContainer, CroppingArea, UploadImageButton }

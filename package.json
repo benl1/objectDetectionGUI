@@ -1,5 +1,13 @@
 {
   "name": "object-detection-gui",
+  "jest": {
+    "moduleNameMapper": {
+      "electron": "<rootDir>/mocks/electronMock.js"
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/test-setup.js"
+    ]
+  },
   "version": "0.0.1",
   "description": "COMP 523 Spring '19 group project",
   "main": "main.js",
@@ -22,6 +30,7 @@
   "devDependencies": {
     "@babel/core": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
+    "@babel/preset-react": "^7.0.0",
     "babel-core": "^6.26.3",
     "babel-jest": "^24.7.1",
     "babel-loader": "^8.0.5",
