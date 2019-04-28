@@ -2,7 +2,7 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import ImageChoiceScreen from '../src/image_choice_screen/image_choice_screen';
-import { ImageContainer, CroppingArea, UploadImageButton } from '../src/image_choice_screen/image_choice_screen';
+import { ImageContainer, CroppingArea } from '../src/image_choice_screen/image_choice_screen';
 
 import renderer from 'react-test-renderer';
 import App from '../src/control/app';
