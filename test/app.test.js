@@ -2,7 +2,7 @@
  * This file tests the functions from /src/control/app.jsx
  */
 import React from 'react';
-import App from '../src/control/app.jsx';
+import App from '../src/control/app';
 
 test('add images', () => {
     const app = new App();

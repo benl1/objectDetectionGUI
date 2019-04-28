@@ -1,6 +1,7 @@
 import React from 'react';
 import { displayYesNoDialog, displayImageUploadDialog, displayErrorDialog, displayImageStoreUploadDialog } from '../control/dialogs';
 import { readFile } from '../control/fileops';
+import {shallow} from 'enzyme';
 import { displaySceneSelectionScreen } from '../entrypoint';
 import { PictureTaker } from '../scene_selection_screen/scene_selection_screen';
 import { countVideoDevices } from '../control/webcam';
@@ -345,3 +346,17 @@ function RImage(props) {
         </div>
     );
 }
+
+function UploadImageButton(props) {
+    return <div className='button' onClick={() => props.click()} id = 'upload_image_button'>
+        Upload an image
+    </div>;
+}
+
+function ClearAllImagesButton(props) {
+    return <div className='button' onClick={() => props.click()}>
+        Clear all images
+    </div>;
+}
+
+export{ ImageContainer, CroppingArea, UploadImageButton }
