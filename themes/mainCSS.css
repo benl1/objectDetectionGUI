@@ -95,6 +95,13 @@ div.imageContainer {
 	justify-content: center;
 }
 
+.flexRow {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
 h3 {
 	font-family: 'Lucida Console', Monaco, monospace;
 	font-size: 1.4rem;
