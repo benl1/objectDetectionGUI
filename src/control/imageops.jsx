@@ -10,8 +10,8 @@ async function getImageDataFromURL(url) {
     let img = new Image();
     let promise = new Promise((res, rej) => {
         img.onload = () => {
-            let canvas = document.createElement('canvas');
-            let context = canvas.getContext('2d');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
 
             canvas.width = img.naturalWidth;
             canvas.height = img.naturalHeight;
@@ -20,7 +20,7 @@ async function getImageDataFromURL(url) {
             res(context.getImageData(0, 0, canvas.width, canvas.height));
         }
     });
-    
+
     return await promise;
 }
 
