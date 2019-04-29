@@ -18,7 +18,6 @@ function drawBoundingBoxes(context, json_response, box_settings) {
 }
 
 function resizeHandler() {
-    console.log('in resize bullshit listener!');
     const output_width = window.innerWidth * .5;
     const output_height = window.innerHeight * .75;
     this.setState({

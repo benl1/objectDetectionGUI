@@ -204,3 +204,5 @@ class RealTimeVideo extends React.Component {
         return <div><canvas ref={this.canvas_ref}></canvas></div>;
     }
 }
+
+export { VideoOutputContainer }

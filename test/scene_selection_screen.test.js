@@ -5,7 +5,7 @@ import { SceneSelectionScreen, SceneSelectionContainer, PictureTaker } from '../
 import renderer from 'react-test-renderer';
 import App from '../src/control/app';
 
-describe('Image Choice screen', () => {
+describe('Scene Selection screen', () => {
 
     it('test that scene selection renders correctly', ()=>{
         const component = renderer.create(
@@ -24,13 +24,10 @@ describe('Image Choice screen', () => {
         expect(tree).toMatchSnapshot();
     })
 
-    // it('test that PictureTaker renders correctly', ()=>{
-    //     const component = renderer.create(
-    //         <PictureTaker app={new App()} />
-    //     );
-    //     let tree = component.toJSON();
-    //     expect(tree).toMatchSnapshot();
-    // })
+    it('test that PictureTaker renders correctly', ()=>{
+        let component = shallow( <PictureTaker app={new App()}/> );
+        expect(component).toMatchSnapshot();
+    })
 
     it('test that scene selection container renders PictureTaker when the state is changed', ()=>{        
         let component = shallow( <SceneSelectionContainer app={new App()} />);
