@@ -83,7 +83,6 @@ class WebcamOutput extends React.Component {
         this.canvas_ref = React.createRef();
         this.is_running = true;
         this.paused = false;
-        this.showPausedButton = props.showPausedButton || false;
     }
 
     componentDidMount() {
@@ -108,9 +107,9 @@ class WebcamOutput extends React.Component {
                         if (track.muted) return;
 
                         image_capture.grabFrame().then((imgData) => {
+                            const ctx = canvas.getContext('2d');
                             canvas.width = self.props.width;
                             canvas.height = self.props.height;
-                            const ctx = canvas.getContext('2d');
                             ctx.drawImage(imgData, 0, 0, self.props.width, self.props.height);
 
                             if (!!props.parent && !!props.parent.handleFrame && !self.paused) {
@@ -179,8 +178,7 @@ class PictureTaker extends React.Component {
 
                             image_capture.grabFrame().then((img_data) => {
                                 /* allow the location where this was constructed to decide 
-                                 * what to do with the captured image 
-                                 */
+                                 * what to do with the captured image */
                                 this.props.handleCapture(img_data, track_settings);
                                 track.stop(); // we've finished using the track and can now stop it.
                             });
