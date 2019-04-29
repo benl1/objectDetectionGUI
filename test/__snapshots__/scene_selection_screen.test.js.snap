@@ -1,6 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Image Choice screen test that scene selection container renders correctly 1`] = `
+exports[`Scene Selection screen test that PictureTaker renders correctly 1`] = `
+<div
+  className="flexColumn"
+>
+  <WebcamOutput
+    height={500}
+    width={500}
+  />
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+     Grab Frame 
+  </div>
+</div>
+`;
+
+exports[`Scene Selection screen test that scene selection container renders correctly 1`] = `
 <div
   className="flexColumn"
 >
@@ -25,7 +42,7 @@ exports[`Image Choice screen test that scene selection container renders correct
 </div>
 `;
 
-exports[`Image Choice screen test that scene selection renders correctly 1`] = `
+exports[`Scene Selection screen test that scene selection renders correctly 1`] = `
 <div
   className="flexColumn"
 >

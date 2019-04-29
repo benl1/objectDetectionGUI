@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Video output screen test that VideoOutputScreen renders correctly 1`] = `
+<div
+  className="flexColumn"
+>
+  <VideoOutputContainer
+    app={
+      App {
+        "image_key": 0,
+        "images": Array [],
+      }
+    }
+  />
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+    Image choice
+  </div>
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+    Scene selection
+  </div>
+</div>
+`;
