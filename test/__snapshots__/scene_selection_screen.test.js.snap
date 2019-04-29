@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Image Choice screen test that scene selection container renders correctly 1`] = `
+<div
+  className="flexColumn"
+>
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+    Upload scene image
+  </div>
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+    Take a picture
+  </div>
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+    Take a video
+  </div>
+</div>
+`;
+
+exports[`Image Choice screen test that scene selection renders correctly 1`] = `
+<div
+  className="flexColumn"
+>
+  <h3>
+    Select scene imagery source
+  </h3>
+  <div
+    className="flexColumn"
+  >
+    <div
+      className="button"
+      onClick={[Function]}
+    >
+      Upload scene image
+    </div>
+    <div
+      className="button"
+      onClick={[Function]}
+    >
+      Take a picture
+    </div>
+    <div
+      className="button"
+      onClick={[Function]}
+    >
+      Take a video
+    </div>
+  </div>
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+    Image choice
+  </div>
+</div>
+`;

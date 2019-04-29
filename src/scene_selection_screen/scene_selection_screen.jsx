@@ -161,7 +161,8 @@ class WebcamOutput extends React.Component {
 
     componentWillUnmount() {
         this.is_running = false;
-        if (this.track) this.track.stop();
+        //if (this.track) this.track.stop();
+        if (this.track) this.track.forEach(track => track.stop());
     }
 
     pause() {
@@ -205,4 +206,4 @@ class PictureTaker extends React.Component {
     }
 }
 
-export { SceneSelectionScreen, WebcamOutput, PictureTaker };
+export { SceneSelectionScreen, WebcamOutput, SceneSelectionContainer, PictureTaker };

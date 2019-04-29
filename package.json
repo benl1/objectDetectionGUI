@@ -6,7 +6,8 @@
     },
     "setupFilesAfterEnv": [
       "<rootDir>/test-setup.js"
-    ]
+    ],
+    "snapshotSerializers": ["enzyme-to-json/serializer"]
   },
   "version": "0.0.1",
   "description": "COMP 523 Spring '19 group project",
@@ -44,10 +45,12 @@
     "electron": "^4.0.5",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
+    "enzyme-to-json": "^3.3.5",
     "fluent-ffmpeg": "^2.1.2",
     "gulp": "^4.0.0",
     "gulp-babel": "^8.0.0",
     "jest": "^24.7.1",
+    "jest-canvas-mock": "^2.0.0",
     "mocha": "^6.1.4",
     "react": "^16.8.3",
     "react-dom": "^16.8.3",

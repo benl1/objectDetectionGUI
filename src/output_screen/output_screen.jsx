@@ -167,3 +167,5 @@ class OutputScreenContainer extends React.Component {
         );
     }
 }
+
+export{ OutputScreenContainer }
