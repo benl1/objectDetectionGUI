@@ -232,7 +232,7 @@ class CroppingArea extends React.Component {
     render() {
         return (
             <div className='flexColumn'>
-                <h3>Click and drag to crop image:</h3>
+                <h3>Click twice to crop image:</h3>
                 <canvas className='croppingCanvas' ref={this.canvas_ref} onClick={(event) => this.handleAreaSelection(event)}></canvas>
                 <div className='button' onClick={() => this.handleWholeImage()}>Take whole image</div>
                 <div className='button' onClick={() => this.handleCropCapture()}>Take cropped image</div>

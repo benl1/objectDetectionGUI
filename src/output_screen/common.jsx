@@ -39,19 +39,25 @@ function drawBoundingBoxes(context, json_response, box_settings) {
     }
 
     context.strokeStyle = 'red';
+    context.font = '16px Verdana';
 
     // draw the bounding boxes and their associated scores to the scene image
     for (let i = 0; i < results.length; i++) {
         const current_result = results[i];
         const [top_x, top_y, bot_x, bot_y] = current_result[0]; // de-structuring!
         const confidence = current_result[1];
-        const height = bot_y - top_y;
 
         context.strokeRect(top_x, top_y, bot_x, bot_y);
-        context.strokeText(`${confidence}`, top_x + 5, top_y + height / 2);
+        context.strokeText(`${(confidence).toFixed(2)}`, top_x + 5, top_y + 5);
     }
 }
 
+/**
+ * Used by the two output screens to change the size of the image or video when
+ * the screen is resized. This is accomplished by setting state within the appropriate
+ * object to be half the window's current width and three quarters of its current
+ * height. 
+ */
 function resizeHandler() {
     const output_width = window.innerWidth * .5;
     const output_height = window.innerHeight * .75;
@@ -61,6 +67,10 @@ function resizeHandler() {
     });
 }
 
+/**
+ * Used on both of the output screens to customize the bounding boxes which are shown
+ * on top of the image or video. 
+ */
 class BoundingBoxSettings extends React.Component {
     constructor(props) {
         super(props);
@@ -74,6 +84,7 @@ class BoundingBoxSettings extends React.Component {
 
     getThreshold() {
         const parse_result = parseFloat(this.threshold_ref.current.value);
+        // if the user has entered something invalid, return 0.5.
         return isNaN(parse_result) ? 0.5 : parse_result;
     }
 
@@ -83,7 +94,7 @@ class BoundingBoxSettings extends React.Component {
                 <label>Number of boxes:</label>
                 <input type='number' min='1' max='10' defaultValue='5' ref={this.box_count_ref}></input>
                 <label>Min threshold:</label>
-                <input type='text' defaultValue='0.5' ref={this.threshold_ref}></input>
+                <input type='number' min='0' max='1' defaultValue='0.5' step='0.01' ref={this.threshold_ref}></input>
             </div>
         );
     }

@@ -136,8 +136,8 @@ class VideoOutputContainer extends React.Component {
         const self = this;
         return (
             <div className='flexColumn'>
-                <div className='videoOutput'>
-                    <WebcamOutput showPausedButton={true} ref={this.webcam_output_ref} parent={this} width={this.state.output_width} height={this.state.output_height}></WebcamOutput>
+                <div className='flexRow'>
+                    <WebcamOutput ref={this.webcam_output_ref} parent={this} width={0} height={0}></WebcamOutput>
                     <RealTimeVideo parent={this} ref={this.realtime_video_ref} width={this.state.output_width} height={this.state.output_height}></RealTimeVideo>
                 </div>
                 <div className='button' onClick={(e) => {
