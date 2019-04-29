@@ -105,7 +105,8 @@ class WebcamOutput extends React.Component {
 
     componentWillUnmount() {
         this.is_running = false;
-        if (this.track) this.track.stop();
+        //if (this.track) this.track.stop();
+        if (this.track) this.track.forEach(track => track.stop());
     }
 
     pause(){
@@ -179,4 +180,4 @@ function SceneSelectionScreenTitle(props) {
     return <h3>Select scene imagery source</h3>;
 }
 
-export { SceneSelectionScreen, WebcamOutput };
+export { SceneSelectionScreen, WebcamOutput, SceneSelectionContainer, PictureTaker };

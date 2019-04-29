@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Output screens test that outputscreen renders correctly 1`] = `
+<div
+  className="flexColumn"
+>
+  <OutputScreenContainer
+    app={
+      App {
+        "image_key": 0,
+        "images": Array [],
+      }
+    }
+  />
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+    Image choice
+  </div>
+  <div
+    className="button"
+    onClick={[Function]}
+  >
+    Scene selection
+  </div>
+</div>
+`;
+
+exports[`Output screens test that outputscreencontainer renders correctly 1`] = `
+<OutputScreenContainer
+  app={
+    App {
+      "image_key": 0,
+      "images": Array [],
+    }
+  }
+>
+  <div
+    className="flexColumn"
+  >
+    <div
+      className="videoOutput"
+    >
+      <canvas
+        className="dontGrow"
+      />
+      <canvas
+        className="dontGrow"
+      />
+    </div>
+  </div>
+</OutputScreenContainer>
+`;
