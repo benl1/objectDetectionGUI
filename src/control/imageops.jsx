@@ -3,12 +3,13 @@ require('babel-polyfill');
 /**
  * Given a string referencing the location of an image on the local filesystem,
  * draw the image to a canvas and then extract an ImageData object from the
- * canvas' context.
+ * canvas' context. This is returned as a promise.
  * @param {String} url 
  */
-async function getImageDataFromURL(url) {
-    let img = new Image();
-    let promise = new Promise((res, rej) => {
+function getImageDataFromURL(url) {
+    const img = new Image();
+    img.src = url;
+    return new Promise((res, rej) => {
         img.onload = () => {
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
@@ -20,8 +21,6 @@ async function getImageDataFromURL(url) {
             res(context.getImageData(0, 0, canvas.width, canvas.height));
         }
     });
-
-    return await promise;
 }
 
 /**

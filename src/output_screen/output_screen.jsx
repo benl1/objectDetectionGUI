@@ -38,11 +38,6 @@ class OutputScreenContainer extends React.Component {
         this.resizeHandler();
         window.addEventListener('resize', this.resizeHandler);
 
-        // convert all the target images to RGB arrays which are ready to be sent to the
-        // python server
-        const target_images = [];
-        this.props.app.images.forEach(img_path => target_images.push(produceRGBArray(getImageDataFromURL(img_path))));
-
         // setup the XHR
         const self = this;
         const xhttp = new XMLHttpRequest();
@@ -61,12 +56,11 @@ class OutputScreenContainer extends React.Component {
         // set-up the scene_image field and send off the XHR request.
         try {
             if (this.props.input_options.input == 'scene_image' || this.props.input_options.input == 'webcam') {
-                this.createInitialImage(this.props.input_options.path, xhttp, target_images);
+                this.createInitialImage(this.props.input_options.path, xhttp);
             }
         } catch (err) {
             displayErrorDialog('Failed to connect to server');
             console.error(err);
-            return;
         }
     }
 
@@ -79,6 +73,8 @@ class OutputScreenContainer extends React.Component {
         // this shouldn't be true for a noticeable amount of time for the user.
         if (this.scene_image === undefined) return;
 
+        // scale the output canvas to the new size assigned by the resize listener added
+        // in componentDidMount.
         const output_canvas = this.output_canvas_ref.current;
         const output_context = output_canvas.getContext('2d');
 
@@ -114,19 +110,31 @@ class OutputScreenContainer extends React.Component {
      * associated bounding boxes. componentDidUpdate is called so that the new image can be drawn
      * for the user to see.
      * @param {String} img_path 
-     * @param {XMLHttpRequest} xhttp 
-     * @param {*} target_images 
+     * @param {XMLHttpRequest} xhttp  
      */
-    createInitialImage(img_path, xhttp, target_images) {
-        console.log(this);
+    createInitialImage(img_path, xhttp) {
         const scene_image = new Image();
+        const self = this;
+
+        scene_image.src = img_path;
         scene_image.onload = () => {
             this.scene_image = scene_image;
-            const scene = this.getRGBArray(scene_image);
-            xhttp.send(JSON.stringify({ scene: scene, targets: target_images }));
-            this.componentDidUpdate();
+            const scene = self.getRGBArray(scene_image);
+
+            // convert all the target images to RGB arrays which are ready to be sent to the
+            // python server
+            // create an array of all the promises from getImageDataFromURL
+            const promises = this.props.app.images.map(img_path => getImageDataFromURL(img_path));
+            // wait on all the promises in the `promises` array to finish executing, then
+            // use the resultant array of scene images converted to an appropriate format
+            // for numpy to dispatch the XHR. after that's done, call componentDidUpdate
+            // to redraw things, just in case.
+            Promise.all(promises).then(img_data_array => {
+                const target_images = img_data_array.map(img_data => produceRGBArray(img_data));
+                xhttp.send(JSON.stringify({ scene: scene, targets: target_images }));
+                self.componentDidUpdate();
+            });
         };
-        scene_image.src = img_path;
     }
 
     /**

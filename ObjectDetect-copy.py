@@ -3,6 +3,7 @@ from flask import jsonify
 import torch
 import PIL
 import torchvision.models as models
+import numpy as np
 from torchvision import transforms as T
 import random
 import datetime
@@ -79,32 +80,30 @@ class DummyNetwork(torch.nn.Module):
 
 @app.route('/detect', methods=['POST'])
 def object_detector():
-    print("new connection")
-    #request.json
-    request.get_data()
+    req = request.json
+
     # send a 400 if the scene image isn't provided
-    # if 'scene' not in req:
-    #     app.make_response(
-    #         (
-    #             'no scene image provided',
-    #             400,
-    #             {'mimetype': 'application/json'}
-    #         )
-    #     )
+    if 'scene' not in req:
+        app.make_response(
+            (
+                'no scene image provided',
+                400,
+                {'mimetype': 'application/json'}
+            )
+        )
 
     # send a 400 if the target image(s) aren't provided
-    # if 'targets' not in req:
-    #     app.make_response(
-    #         (
-    #             'no target images provided',
-    #             400,
-    #             {'mimetype': 'application/json'}
-    #         )
-    #     )
-    print("start p")
-    #scene = np.array(req['scene'])
-    #targets = [np.array(i) for i in req['targets']]
+    if 'targets' not in req:
+        app.make_response(
+            (
+                'no target images provided',
+                400,
+                {'mimetype': 'application/json'}
+            )
+        )
     
+    scene = np.array(req['scene'])
+    targets = [np.array(i) for i in req['targets']]
     
     #num_rows = scene.shape[2]
     #num_cols = scene.shape[3]
@@ -113,12 +112,11 @@ def object_detector():
 
     for i in range(10):
         temp = []
-        for i in range(4):
-            temp.append(random.choice([i for i in range(300)]))
+        for j in range(4):
+            temp.append(random.choice([k for k in range(300)]))
         boxes.append(temp)
         scores.append(random.random())
     
-    print("end p")
     return jsonify({'boxes': boxes, 'scores': scores})
 
 

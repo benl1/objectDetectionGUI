@@ -23,12 +23,12 @@ class VideoOutputContainer extends React.Component {
         this.webcam_output_ref = React.createRef();
         this.realtime_video_ref = React.createRef();
         this.box_settings_ref = React.createRef();
+        this.target_images = [];
         this.firstFrame = true;
         this.inputQueue = [];
         this.outputQueue = [];
-        this.recorder = undefined;
-
         this.chunks = [];
+        this.recorder = undefined;
 
         this.state = {
             output_width: 0,
@@ -36,17 +36,25 @@ class VideoOutputContainer extends React.Component {
         }
     }
 
+    componentWillMount() {
+        // calculate the RGB arrays for the target images once so we don't have to
+        // every frame of video that we go through
+        // the approach here is a bit different from that which we took in output_screen.jsx.
+        // instead of assuring ourselves that every image has been converted to an appropriate
+        // form before we allow things to get sent to the server, we just send things to the
+        // server ASAP. this might mean that the first info sent to the server doesn't
+        // have all the target images, but subsequent ones are sure to.
+        const self = this;
+        this.props.app.images
+            .forEach(img_path => getImageDataFromURL(img_path)
+            .then(img_data => self.target_images.push(produceRGBArray(img_data))));
+    }
+
     componentDidMount() {
         // call the resize handler and register it with the window.
         this.resizeHandler = resizeHandler.bind(this);
         this.resizeHandler();
         window.addEventListener('resize', this.resizeHandler);
-
-        // calculate the RGB arrays for the target images once so we don't have to
-        // every frame of video that we go through
-        const target_images = [];
-        this.props.app.images.forEach(img_path => target_images.push(produceRGBArray(getImageDataFromURL(img_path))));
-        this.target_images = target_images;
 
         // capture the stream at 19 FPS
         this.stream = this.realtime_video_ref.current.getCanvas().captureStream(19)
@@ -77,7 +85,6 @@ class VideoOutputContainer extends React.Component {
     processFrame() {
         const imgData = this.inputQueue.shift(); // take the image data from the front of the queue
         const rtvComp = this.realtime_video_ref.current;
-        const target_images = this.target_images;
         const self = this;
 
         // draw the image data to a canvas
@@ -121,7 +128,7 @@ class VideoOutputContainer extends React.Component {
         };
 
         const scene = produceRGBArray(temp_ctx.getImageData(0, 0, temp_canvas.width, temp_canvas.height));
-        xhttp.send(JSON.stringify({ scene: scene, targets: target_images }));
+        xhttp.send(JSON.stringify({ scene: scene, targets: this.target_images }));
     }
 
     render() {
@@ -139,24 +146,27 @@ class VideoOutputContainer extends React.Component {
                         e.target.innerHTML = self.webcam_output_ref.current.pause() ? "Resume video" : "Pause video";
                     }}>Pause video</div>
                     <div id="download_video" className="button" onClick={() => {
-                        self.recorder.stop()
-                        var blob = new Blob(self.chunks, { type: "video/webm" })
-                        var urlObj = URL.createObjectURL(blob)
-                        var a = document.createElement('a');
+                        self.recorder.stop();
+
+                        const blob = new Blob(self.chunks, { type: "video/webm" });
+                        const urlObj = URL.createObjectURL(blob)
+                        const a = document.createElement('a');
+
                         document.body.appendChild(a);
                         a.style = 'display: none';
                         a.href = urlObj;
                         a.download = 'test.webm';
                         a.click();
-                        self.chunks.length = 0
-                        self.stream = self.realtime_video_ref.current.getCanvas().captureStream(19)
-                        var options = { mimeType: 'video/webm;codecs=vp9' }
+                        
+                        self.chunks.length = 0;
+                        self.stream = self.realtime_video_ref.current.getCanvas().captureStream(19);
 
-                        self.recorder = new MediaRecorder(self.stream, options)
+                        const options = { mimeType: 'video/webm;codecs=vp9' };
+                        self.recorder = new MediaRecorder(self.stream, options);
                         self.recorder.ondataavailable = self.handleData.bind(self);
-                        self.recorder.start()
+                        self.recorder.start();
 
-                        window.URL.revokeObjectURL(urlObj)
+                        window.URL.revokeObjectURL(urlObj);
                     }}>Save video output</div>
                 </div>
             </div>

@@ -1,6 +1,7 @@
 import { displayImageChoiceScreen, displayOutputScreen, displayVideoOutputScreen } from '../entrypoint';
 import { displayImageUploadDialog, displayErrorDialog } from '../control/dialogs';
 import React from 'react';
+import { countVideoDevices } from '../control/webcam';
 
 class SceneSelectionScreen extends React.Component {
     render() {
@@ -23,6 +24,9 @@ class SceneSelectionContainer extends React.Component {
         };
     }
 
+    /**
+     * Called when the user clicks on the 'Upload scene image' button.
+     */
     handleSceneImageUpload() {
         const img_paths = displayImageUploadDialog();
         if (img_paths === undefined) return;
@@ -36,12 +40,31 @@ class SceneSelectionContainer extends React.Component {
         });
     }
 
+    /**
+     * Called when the user clicks on the 'Take a picture' button.
+     */
     handleWebcam() {
-        this.setState({ showPictureTaker: true })
+        const self = this;
+        countVideoDevices().then(count => {
+            if (count > 0) {
+                self.setState({ showPictureTaker: true });
+            } else {
+                displayErrorDialog('No webcams detected');
+            }
+        });
     }
 
+    /**
+     * Called when the user clicks on the 'Take a video' button.
+     */
     handleVideo() {
-        displayVideoOutputScreen(this.props.app);
+        countVideoDevices().then(count => {
+            if (count > 0) {
+                displayVideoOutputScreen(this.props.app);
+            } else {
+                displayErrorDialog('No webcams detected');
+            }
+        });
     }
 
     captureHandler(img_data) {
@@ -62,15 +85,9 @@ class SceneSelectionContainer extends React.Component {
     render() {
         return (
             <div className='flexColumn'>
-                <div className='button' onClick={() => this.handleSceneImageUpload()}>
-                    Upload scene image
-                </div>
-                <div className='button' onClick={() => this.handleWebcam()}>
-                    Take a picture
-                </div>
-                <div className='button' onClick={() => this.handleVideo()}>
-                    Take a video
-                </div>
+                <div className='button' onClick={() => this.handleSceneImageUpload()}>Upload scene image</div>
+                <div className='button' onClick={() => this.handleWebcam()}>Take a picture</div>
+                <div className='button' onClick={() => this.handleVideo()}>Take a video</div>
                 {this.state.showPictureTaker ? <PictureTaker handleCapture={this.captureHandler.bind(this)}></PictureTaker> : null}
             </div>
         );
@@ -153,39 +170,29 @@ class WebcamOutput extends React.Component {
     }
 
     render() {
-        return <canvas ref={this.canvas_ref} />;
+        return <canvas ref={this.canvas_ref} ></canvas>;
     }
 }
 
 class PictureTaker extends React.Component {
     takePicture() {
-        /* first, check to make sure that the user has a webcam plugged in. 
-         * if they don't, warn them, and then exit, otherwise, show them the
-         * output from the webcam and allow them to capture a frame.
-         */
-        navigator.mediaDevices.enumerateDevices()
-            .then(devices => {
-                const video_devices = devices.filter(device => (device.kind === 'videoinput'));
+        navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+            .then(stream => {
+                const track = stream.getVideoTracks()[0];
+                const track_settings = track.getSettings();
+                const image_capture = new ImageCapture(track);
 
-                if (video_devices.length == 0) {
-                    displayErrorDialog('No webcams found!');
-                } else {
-                    navigator.mediaDevices.getUserMedia({ audio: false, video: true })
-                        .then(stream => {
-                            const track = stream.getVideoTracks()[0];
-                            const track_settings = track.getSettings();
-                            const image_capture = new ImageCapture(track);
-
-                            image_capture.grabFrame().then((img_data) => {
-                                /* allow the location where this was constructed to decide 
-                                 * what to do with the captured image */
-                                this.props.handleCapture(img_data, track_settings);
-                                track.stop(); // we've finished using the track and can now stop it.
-                            });
-                        }).catch((err) => console.error(err));
-                }
+                image_capture.grabFrame().then((img_data) => {
+                    /* allow the location where this was constructed to decide 
+                    * what to do with the captured image */
+                    this.props.handleCapture(img_data, track_settings);
+                    track.stop(); // we've finished using the track and can now stop it.
+                    // if we hadn't stopped the track, the webcam would remain on and
+                    // we would have trouble opening it if we clicked on a different
+                    // webcam-related button in the application.
+                });
             })
-            .catch(err => console.error(err));
+            .catch((err) => console.error(err));
     }
 
     render() {

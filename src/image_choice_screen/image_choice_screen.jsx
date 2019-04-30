@@ -3,6 +3,7 @@ import { displayYesNoDialog, displayImageUploadDialog, displayErrorDialog, displ
 import { readFile } from '../control/fileops';
 import { displaySceneSelectionScreen } from '../entrypoint';
 import { PictureTaker } from '../scene_selection_screen/scene_selection_screen';
+import { countVideoDevices } from '../control/webcam';
 
 export default class ImageChoiceScreen extends React.Component {
     handleSceneSelectionClick() {
@@ -69,7 +70,13 @@ class ImageContainer extends React.Component {
     }
 
     takePicture() {
-        this.setState({ show_picture_area: true, show_cropping_area: false });
+        countVideoDevices().then(count => {
+            if (count > 0) {
+                this.setState({ show_picture_area: true, show_cropping_area: false });
+            } else {
+                displayErrorDialog('No webcams detected');
+            }
+        });
     }
 
     handlePictureCapture(img_data, track_settings) {
