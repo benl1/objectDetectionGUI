@@ -5,15 +5,14 @@ import { getImageDataFromURL, produceRGBArray } from '../control/imageops';
 import { displayErrorDialog } from '../control/dialogs';
 import React from 'react';
 
-
-const fs = require('fs');
-
 export default function VideoOutputScreen(props) {
     return (
         <div className='flexColumn'>
             <VideoOutputContainer app={props.app}></VideoOutputContainer>
-            <div className='button' onClick={() => displayImageChoiceScreen(props.app)}>Image choice</div>
-            <div className='button' onClick={() => displaySceneSelectionScreen(props.app)}>Scene selection</div>
+            <div className='flexRow'>
+                <div className='button' onClick={() => displayImageChoiceScreen(props.app)}>Image choice</div>
+                <div className='button' onClick={() => displaySceneSelectionScreen(props.app)}>Scene selection</div>
+            </div>
         </div>
     );
 }
@@ -39,7 +38,6 @@ class VideoOutputContainer extends React.Component {
 
     componentDidMount() {
         // call the resize handler and register it with the window.
-
         this.resizeHandler = resizeHandler.bind(this);
         this.resizeHandler();
         window.addEventListener('resize', this.resizeHandler);
@@ -50,16 +48,16 @@ class VideoOutputContainer extends React.Component {
         this.props.app.images.forEach(img_path => target_images.push(produceRGBArray(getImageDataFromURL(img_path))));
         this.target_images = target_images;
 
+        // capture the stream at 19 FPS
         this.stream = this.realtime_video_ref.current.getCanvas().captureStream(19)
-        var options = {mimeType : 'video/webm;codecs=vp9'}
-        
+        const options = { mimeType: 'video/webm;codecs=vp9' }
+
         this.recorder = new MediaRecorder(this.stream, options)
         this.recorder.ondataavailable = this.handleData.bind(this);
     }
 
-    handleData (e) {
-        console.log(e.data.size)
-        if (e.data.size > 0){
+    handleData(e) {
+        if (e.data.size > 0) {
             this.chunks.push(e.data)
         }
     }
@@ -72,10 +70,7 @@ class VideoOutputContainer extends React.Component {
         if (this.firstFrame) {
             this.firstFrame = false;
             this.processFrame();
-            console.log("Started recorder")
-            this.recorder.start()
-            console.log(this.recorder)
-
+            this.recorder.start();
         }
     }
 
@@ -92,10 +87,6 @@ class VideoOutputContainer extends React.Component {
         const temp_ctx = temp_canvas.getContext('2d');
         temp_ctx.drawImage(imgData, 0, 0, temp_canvas.width, temp_canvas.height);
 
-        // Start the recording if the first frame of the output has been created
-
-        
-
         // prepare the rest call
         const xhttp = new XMLHttpRequest();
         xhttp.open('POST', 'http://127.0.0.1:5000/detect', true);
@@ -110,10 +101,10 @@ class VideoOutputContainer extends React.Component {
                 drawBoundingBoxes(temp_ctx, response, box_settings);
                 this.outputQueue.push(temp_canvas.toDataURL("image/png"))
                 rtvComp.showFrame(temp_canvas);
-                if(self.recorder.state === 'recording'){
+                if (self.recorder.state === 'recording') {
                     self.recorder.requestData();
                 }
-                
+
                 const callback = () => {
                     if (self.inputQueue.length > 0) {
                         self.processFrame();
@@ -124,7 +115,8 @@ class VideoOutputContainer extends React.Component {
 
                 callback();
             } else if (xhttp.status !== 200) {
-                displayErrorDialog('Server error');
+                displayErrorDialog(`Server error ${xhttp.status}`);
+                console.error(xhttp);
             }
         };
 
@@ -140,34 +132,33 @@ class VideoOutputContainer extends React.Component {
                     <WebcamOutput ref={this.webcam_output_ref} parent={this} width={0} height={0}></WebcamOutput>
                     <RealTimeVideo parent={this} ref={this.realtime_video_ref} width={this.state.output_width} height={this.state.output_height}></RealTimeVideo>
                 </div>
-                <div className='button' onClick={(e) => {
-                    e.target.innerHTML = self.webcam_output_ref.current.pause() ? "Resume video" : "Pause video";
-                }}>Pause video</div>
-                <BoundingBoxSettings ref={this.box_settings_ref}></BoundingBoxSettings>
-                <div id = "download_video" className="button" onClick = { () => {
-                    // self.recorder.pause()
-                    self.recorder.stop()
-                    var blob = new Blob(self.chunks, {type: "video/webm"})  
-                    var urlObj = URL.createObjectURL(blob)
-                    var a = document.createElement('a');
-                    document.body.appendChild(a);
-                    a.style = 'display: none';
-                    a.href = urlObj;
-                    a.download = 'test.webm';
-                    a.click();
-                    a.click();
-                    self.chunks.length = 0
-                    self.stream = self.realtime_video_ref.current.getCanvas().captureStream(19)
-                    var options = {mimeType : 'video/webm;codecs=vp9'}
-                    
-                    self.recorder = new MediaRecorder(self.stream, options)
-                    self.recorder.ondataavailable = self.handleData.bind(self);
-                    self.recorder.start()
-                    // self.recorder.resume()
-                    window.URL.revokeObjectURL(urlObj)
 
-                    }
-                }></div>
+                <BoundingBoxSettings ref={this.box_settings_ref}></BoundingBoxSettings>
+                <div className='flexRow'>
+                    <div className='button' onClick={(e) => {
+                        e.target.innerHTML = self.webcam_output_ref.current.pause() ? "Resume video" : "Pause video";
+                    }}>Pause video</div>
+                    <div id="download_video" className="button" onClick={() => {
+                        self.recorder.stop()
+                        var blob = new Blob(self.chunks, { type: "video/webm" })
+                        var urlObj = URL.createObjectURL(blob)
+                        var a = document.createElement('a');
+                        document.body.appendChild(a);
+                        a.style = 'display: none';
+                        a.href = urlObj;
+                        a.download = 'test.webm';
+                        a.click();
+                        self.chunks.length = 0
+                        self.stream = self.realtime_video_ref.current.getCanvas().captureStream(19)
+                        var options = { mimeType: 'video/webm;codecs=vp9' }
+
+                        self.recorder = new MediaRecorder(self.stream, options)
+                        self.recorder.ondataavailable = self.handleData.bind(self);
+                        self.recorder.start()
+
+                        window.URL.revokeObjectURL(urlObj)
+                    }}>Save video output</div>
+                </div>
             </div>
         );
     }
@@ -178,9 +169,11 @@ class RealTimeVideo extends React.Component {
         super(props);
         this.canvas_ref = React.createRef();
     }
+
     getCanvas() {
         return this.canvas_ref.current;
     }
+
     componentDidMount() {
         const canvas = this.canvas_ref.current;
         canvas.width = this.props.width;

@@ -8,8 +8,10 @@ export default function OutputScreen(props) {
     return (
         <div className='flexColumn'>
             <OutputScreenContainer app={props.app} input_options={props.input_options} />
-            <div className='button' onClick={() => displayImageChoiceScreen(props.app)}>Image choice</div>
-            <div className='button' onClick={() => displaySceneSelectionScreen(props.app)}>Scene selection</div>
+            <div className='flexRow'>
+                <div className='button' onClick={() => displayImageChoiceScreen(props.app)}>Image choice</div>
+                <div className='button' onClick={() => displaySceneSelectionScreen(props.app)}>Scene selection</div>
+            </div>
         </div>
     );
 }

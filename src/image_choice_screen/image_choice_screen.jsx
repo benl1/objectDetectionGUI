@@ -10,7 +10,7 @@ export default class ImageChoiceScreen extends React.Component {
         if (this.props.app.getImages().length > 0) {
             displaySceneSelectionScreen(this.props.app);
         } else {
-            displayErrorDialog('select at least one target image first');
+            displayErrorDialog('Select at least one target image first');
         }
     }
 
@@ -30,22 +30,20 @@ class ImageContainer extends React.Component {
         super(props);
         this.state = {
             images: [],
-            showCroppingArea: false,
-            showPictureArea: false,
+            show_cropping_area: false,
+            show_picture_area: false,
             last_img_path: '',
         }
 
         let imgs = this.props.app.getImages();
+        const self = this;
+
         if (imgs.length === 0) return;
-        let self = this
 
         imgs = imgs.map((src, idx) => <RImage src={src} removeFunc={(imgsrc) => self.clearImage(imgsrc)} key={idx} />);
-        // use this.state.images instead of setState because the component isn't mounted yet
         this.state.images = imgs;
     }
-    testFunction() {
-        console.log("success!")
-    }
+
     uploadImage() {
         const file_upload = displayImageUploadDialog();
         if (file_upload === undefined) return;
@@ -53,8 +51,8 @@ class ImageContainer extends React.Component {
         this.setState({
             show_cropping_area: true,
             show_image_store_area: false,
+            show_picture_area: false,
             last_img_path: file_upload[0],
-            showPictureArea: false
         });
     }
 
@@ -63,14 +61,15 @@ class ImageContainer extends React.Component {
         if (file_upload === undefined) return;
 
         this.setState({
-            show_image_store_area: true,
             show_cropping_area: false,
+            show_image_store_area: true,
+            show_picture_area: false,
             last_img_path: file_upload[0]
         });
     }
 
     takePicture() {
-        this.setState({ showPictureArea: true, showCroppingArea: false });
+        this.setState({ show_picture_area: true, show_cropping_area: false });
     }
 
     handlePictureCapture(img_data, track_settings) {
@@ -79,7 +78,7 @@ class ImageContainer extends React.Component {
         canvas.width = track_settings.width;
         canvas.height = track_settings.height;
         context.drawImage(img_data, 0, 0);
-        this.setState({ showPictureArea: false, showCroppingArea: true, last_img_path: canvas.toDataURL() })
+        this.setState({ show_picture_area: false, show_cropping_area: true, last_img_path: canvas.toDataURL() })
     }
 
     clearAllImages() {
@@ -99,23 +98,29 @@ class ImageContainer extends React.Component {
         this.props.app.removeImage(imgSrc);
     }
 
+    addImage(img_src) {
+        const imgs = this.state.images;
+        const key = this.props.app.addImage(img_src);
+        imgs.push(<RImage src={img_src} key={key} remove_func={() => this.clearImage(img_src)}></RImage>);
+        this.setState({ images: imgs });
+    }
+
     render() {
         return (
             <div className='flexColumn'>
-                <div className='button' onClick={() => this.uploadImage()}>Upload an image</div>
-                <div className='button' onClick={() => this.takePicture()}>Take picture</div>
-                {this.state.showPictureArea ? <PictureTaker handleCapture={this.handlePictureCapture.bind(this)}></PictureTaker> : null}
+                <div className='flexRow'>
+                    <div className='button' onClick={() => this.uploadImage()}>Upload an image</div>
+                    <div className='button' onClick={() => this.takePicture()}>Take picture</div>
+                    <div className='button' onClick={() => this.loadImageStore()}>Use image store</div>
+                </div>
+
+                {this.state.show_image_store_area ? <ImageStoreArea parent={this} path={this.state.last_img_path}></ImageStoreArea> : null}
+                {this.state.show_picture_area ? <PictureTaker handleCapture={this.handlePictureCapture.bind(this)}></PictureTaker> : null}
+
                 <div className='button' onClick={() => this.clearAllImages()}>Clear all images</div>
-                <ImageStoreButton click={() => this.loadImageStore()} />
                 <div className='imageContainer'>{this.state.images}</div>
-                {this.state.show_cropping_area ?
-                    <CroppingArea parent={this} img_path={this.state.last_img_path}></CroppingArea> :
-                    null
-                }
-                {this.state.show_image_store_area ?
-                    <ImageStoreArea parent={this} path={this.state.last_img_path}></ImageStoreArea> :
-                    null
-                }
+
+                {this.state.show_cropping_area ? <CroppingArea parent={this} img_path={this.state.last_img_path}></CroppingArea> : null}
             </div>
         );
     }
@@ -124,9 +129,7 @@ class ImageContainer extends React.Component {
 class ImageStoreArea extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            images: [],
-        };
+        this.state = { images: [] };
     }
 
     // when the component loads, read the JSON file and try getting the images from it.
@@ -160,7 +163,12 @@ class ImageStoreArea extends React.Component {
     }
 
     render() {
-        return <div>{this.state.images}</div>;
+        return (
+            <div className='flexColumn'>
+                <h3>Image store:</h3>
+                <div className='flexRow'>{this.state.images}</div>
+            </div>
+        );
     }
 }
 
@@ -252,7 +260,7 @@ class CroppingArea extends React.Component {
     }
 
     handleWholeImage() {
-        this.addNewImageToParent(this.props.parent, this.props.img_path);
+        this.addNewImageToParent(this.props.img_path);
     }
 
     handleCropCapture() {
@@ -265,27 +273,37 @@ class CroppingArea extends React.Component {
         if (!state.one_click_point || !state.two_click_point) {
             displayErrorDialog("You need to choose two points before cropping.")
         } else {
-            let fp = state.one_click_point, sp = state.two_click_point;
-            let width = Math.abs(fp.x - sp.x), height = Math.abs(fp.y - sp.y);
+            const first_point = state.one_click_point;
+            const second_point = state.two_click_point;
+            const width = Math.abs(first_point.x - second_point.x);
+            const height = Math.abs(first_point.y - second_point.y);
+            const tmp_canvas = document.createElement("canvas");
+            const ctx = tmp_canvas.getContext('2d');
 
-            let cv = document.createElement("canvas");
-            cv.width = width; cv.height = height;
+            tmp_canvas.width = width;
+            tmp_canvas.height = height;
+            ctx.drawImage(canvas,
+                Math.min(first_point.x, second_point.x),
+                Math.min(first_point.y, second_point.y),
+                width,
+                height,
+                0,
+                0,
+                width,
+                height
+            );
 
-            let ctx = cv.getContext('2d');
-
-            ctx.drawImage(canvas, Math.min(fp.x, sp.x), Math.min(fp.y, sp.y), width, height,
-                0, 0, width, height);
-
-            let dataPath = cv.toDataURL();
-
-            const junk_parent = this.props.death;
-            // notify the app that we've added a new image - it will give us a key
-            const key = junk_parent.props.app.addImage(dataPath);
-            const imgs = junk_parent.state.images;
-
-            imgs.push(this.createRImage(dataPath, key));
-            junk_parent.setState({ images: imgs, showCroppingArea: false });
+            this.addNewImageToParent(tmp_canvas.toDataURL());
         }
+    }
+
+    /**
+     * Let the parent add a new image to its image container, then change its state so that the
+     * cropping area is disabled.
+     */
+    addNewImageToParent(img_path) {
+        this.props.parent.addImage(img_path);
+        this.props.parent.setState({ show_cropping_area: false });
     }
 
     createRImage(src, key) {
@@ -316,7 +334,7 @@ function RImage(props) {
     return (
         <div className='imageWrapper'>
             <img className='image' src={props.src} />
-            <img className='imageDelete' src="assets/deleteImageSymbol.jpg" onClick={(e) => props.removeFunc(props.src)} />
+            <img className='imageDelete' src='assets/deleteImageSymbol.jpg' onClick={(e) => props.remove_func(props.src)} />
         </div>
     );
 }
