@@ -2,9 +2,11 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import ImageChoiceScreen from '../src/image_choice_screen/image_choice_screen';
-import { ImageContainer, CroppingArea } from '../src/image_choice_screen/image_choice_screen';
+import { ImageContainer, CroppingArea, ImageStoreArea } from '../src/image_choice_screen/image_choice_screen';
+import {PictureTaker} from '../src/scene_selection_screen/scene_selection_screen'
 import renderer from 'react-test-renderer';
 import App from '../src/control/app';
+const fs = require('fs') 
 
 describe('Image Choice screen', () => {
     it('test that image choice renders correctly', ()=>{
@@ -56,5 +58,35 @@ describe('Image Choice screen', () => {
         expect(parent.prop('app').images).toHaveLength(1);
         parent.instance().clearImage(path)
         expect(parent.prop('app').images).toHaveLength(0);
+    })
+
+    it('test that target image selection container renders PictureTaker when the state is changed', ()=>{        
+        let component = shallow( <ImageContainer app={new App()} />);
+        expect(component.find(PictureTaker)).toHaveLength(0);        
+        component.instance().setState({show_picture_area: true});
+        component.instance().forceUpdate();
+        component = component.update();
+        expect(component.find(PictureTaker)).toHaveLength(1);
+    })
+
+    it('renders the image store area properly', () => {
+        const parent = mount(<ImageContainer app = {new App()} />)
+        const img_path =  "assets/test.json"
+        // parent.instance().setState({last_img_path: "/assets/robot.jpg"})
+        let component = mount(<ImageStoreArea parent = {parent.instance()} path = {img_path} />) 
+        expect(component).toMatchSnapshot();
+    })
+
+    it('renders the image store area when the state is changed', () => {
+        var parent = mount(<ImageContainer app = {new App()} />)
+
+        var img_path =  "assets/test.json"
+        expect(parent.find(ImageStoreArea)).toHaveLength(0)
+        parent.instance().setState({show_image_store_area: true, last_img_path: img_path})
+
+        parent.instance().forceUpdate()
+        parent = parent.update()
+        expect(parent.find(ImageStoreArea)).toHaveLength(1)
+        
     })
 });

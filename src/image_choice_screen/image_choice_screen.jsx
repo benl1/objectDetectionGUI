@@ -142,6 +142,7 @@ class ImageStoreArea extends React.Component {
 
     // when the component loads, read the JSON file and try getting the images from it.
     componentDidMount() {
+        console.log(this.props.path)
         const raw_data = readFile(this.props.path);
         const json_data = JSON.parse(raw_data);
         const imgs = json_data.imgs;
@@ -359,4 +360,4 @@ function ClearAllImagesButton(props) {
     </div>;
 }
 
-export{ ImageContainer, CroppingArea }
+export{ ImageContainer, CroppingArea, ImageStoreArea }
