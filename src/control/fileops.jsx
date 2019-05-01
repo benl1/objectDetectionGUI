@@ -6,7 +6,6 @@ const fs = require('fs');
  * @param {String} path 
  */
 function readFile(path) {
-    console.log(path)
     return fs.readFileSync(path);
 }
 
