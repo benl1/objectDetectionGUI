@@ -36,7 +36,7 @@ function produceRGBArray(image_data) {
 
     for (let x = 0; x < image_width; x++) {
         let column = [];
-
+        // Data is held in tuples of len 4 (R, G, B, A) and we need to send it as a list of lists with each list containing the RGB components.
         for (let y = 0; y < image_height; y++) {
             let red = image_data.data[idx++];
             let green = image_data.data[idx++];
