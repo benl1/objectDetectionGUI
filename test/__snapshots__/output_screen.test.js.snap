@@ -13,16 +13,20 @@ exports[`Output screens test that outputscreen renders correctly 1`] = `
     }
   />
   <div
-    className="button"
-    onClick={[Function]}
+    className="flexRow"
   >
-    Image choice
-  </div>
-  <div
-    className="button"
-    onClick={[Function]}
-  >
-    Scene selection
+    <div
+      className="button"
+      onClick={[Function]}
+    >
+      Image choice
+    </div>
+    <div
+      className="button"
+      onClick={[Function]}
+    >
+      Scene selection
+    </div>
   </div>
 </div>
 `;
@@ -35,19 +39,50 @@ exports[`Output screens test that outputscreencontainer renders correctly 1`] = 
       "images": Array [],
     }
   }
+  input_options={
+    Object {
+      "input": "webcam",
+    }
+  }
 >
   <div
     className="flexColumn"
   >
+    <canvas
+      className="dontGrow"
+    />
     <div
-      className="videoOutput"
+      className="flexRow"
     >
-      <canvas
-        className="dontGrow"
-      />
-      <canvas
-        className="dontGrow"
-      />
+      <BoundingBoxSettings>
+        <div>
+          <label>
+            Number of boxes:
+          </label>
+          <input
+            defaultValue="5"
+            max="10"
+            min="1"
+            type="number"
+          />
+          <label>
+            Min threshold:
+          </label>
+          <input
+            defaultValue="0.5"
+            max="1"
+            min="0"
+            step="0.01"
+            type="number"
+          />
+        </div>
+      </BoundingBoxSettings>
+      <div
+        className="button"
+        onClick={[Function]}
+      >
+        Redraw
+      </div>
     </div>
   </div>
 </OutputScreenContainer>

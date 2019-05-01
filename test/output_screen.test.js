@@ -9,15 +9,12 @@ import App from '../src/control/app';
 describe('Output screens', () => {
 
     it('test that outputscreen renders correctly', ()=>{
-        let component = shallow(<OutputScreen app={new App()}/>);
-        expect(component.find(OutputScreenContainer)).toHaveLength(1);
-        expect(component.find('.button')).toHaveLength(2);
+        let component = shallow(<OutputScreen app={new App()} />);
         expect(component).toMatchSnapshot();
     })
 
     it('test that outputscreencontainer renders correctly', ()=>{
-        let component = mount(<OutputScreenContainer app={new App()}/>)
-        expect(component.find('.videoOutput')).toHaveLength(1);
+        let component = mount(<OutputScreenContainer app={new App()} input_options={{input: 'webcam'}}/>)
         expect(component).toMatchSnapshot();
     })
 

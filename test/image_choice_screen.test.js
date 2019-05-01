@@ -37,7 +37,7 @@ describe('Image Choice screen', () => {
     it('test that image choice renders cropping area when the state is changed', ()=>{        
         let component = shallow( <ImageContainer app={new App()} />);
         expect(component.find(CroppingArea)).toHaveLength(0);        
-        component.instance().setState({showCroppingArea: true, last_img_path:""});
+        component.instance().setState({show_cropping_area: true, last_img_path:""});
         component.instance().forceUpdate();
         component = component.update();
         expect(component.find(CroppingArea)).toHaveLength(1);
@@ -47,7 +47,7 @@ describe('Image Choice screen', () => {
         // using mount so we can access the props
         const path = "<rootDir>/assets/robot.jpg"
         let parent = mount(<ImageContainer app={new App()} />);
-        let component = mount(<CroppingArea death = {parent.instance()} img_path = {path}/>)
+        let component = mount(<CroppingArea parent = {parent.instance()} img_path = {path}/>)
         expect(component.prop('img_path')).toEqual(path)
         component.instance().handleWholeImage();
         component.instance().forceUpdate();

@@ -11,11 +11,26 @@ exports[`Image Choice screen test that image choice renders correctly 1`] = `
     className="flexColumn"
   >
     <div
-      className="button"
-      id="upload_image_button"
-      onClick={[Function]}
+      className="flexRow"
     >
-      Upload an image
+      <div
+        className="button"
+        onClick={[Function]}
+      >
+        Upload an image
+      </div>
+      <div
+        className="button"
+        onClick={[Function]}
+      >
+        Take picture
+      </div>
+      <div
+        className="button"
+        onClick={[Function]}
+      >
+        Use image store
+      </div>
     </div>
     <div
       className="button"
@@ -41,11 +56,26 @@ exports[`Image Choice screen test that imagecontainer renders correctly 1`] = `
   className="flexColumn"
 >
   <div
-    className="button"
-    id="upload_image_button"
-    onClick={[Function]}
+    className="flexRow"
   >
-    Upload an image
+    <div
+      className="button"
+      onClick={[Function]}
+    >
+      Upload an image
+    </div>
+    <div
+      className="button"
+      onClick={[Function]}
+    >
+      Take picture
+    </div>
+    <div
+      className="button"
+      onClick={[Function]}
+    >
+      Use image store
+    </div>
   </div>
   <div
     className="button"
@@ -64,7 +94,7 @@ exports[`Image Choice screen tests that cropping area renders correctly 1`] = `
   className="flexColumn"
 >
   <h3>
-    Click and drag to crop image:
+    Click twice to crop image:
   </h3>
   <canvas
     className="croppingCanvas"

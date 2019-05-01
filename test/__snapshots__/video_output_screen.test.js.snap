@@ -13,16 +13,20 @@ exports[`Video output screen test that VideoOutputScreen renders correctly 1`] =
     }
   />
   <div
-    className="button"
-    onClick={[Function]}
+    className="flexRow"
   >
-    Image choice
-  </div>
-  <div
-    className="button"
-    onClick={[Function]}
-  >
-    Scene selection
+    <div
+      className="button"
+      onClick={[Function]}
+    >
+      Image choice
+    </div>
+    <div
+      className="button"
+      onClick={[Function]}
+    >
+      Scene selection
+    </div>
   </div>
 </div>
 `;
